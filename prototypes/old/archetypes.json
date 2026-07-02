@@ -1,0 +1,339 @@
+[
+  {
+    "id": "archivist",
+    "name": "The Archivist",
+    "creature": "Robed figure at a towering stone desk, ancient books orbiting in rings like planetary systems. Celestial dust drifts between the volumes.",
+    "readerType": "Layer diggers, annotators, re-readers",
+    "why": "Reads to accumulate and connect. Treats books as a system, not a pastime. Probably has a spreadsheet.",
+    "genres": "Dense literary fiction, historical epics, classics",
+    "exampleBooks": ["Pachinko", "Middlemarch", "A Gentleman in Moscow"],
+    "bio": "You don't read books — you excavate them. Every margin is a dig site, every chapter a stratum. You're not just collecting stories; you're building an archive of human consciousness, cross-referenced and annotated.",
+    "superlative": "The reader most likely to notice that a minor character in chapter 3 contradicts themselves in chapter 17, and to care deeply about it.",
+    "roast": "Your idea of a beach read is a 900-page doorstop with footnotes.",
+    "strengths": ["Contextual depth", "Pattern recognition", "Long memory"],
+    "axes": {
+      "heartVsHead": 4,
+      "plotVsProse": 4,
+      "familiarVsFrontier": 2,
+      "lightVsDark": 3,
+      "realVsImagined": 3
+    },
+    "compatibility": {
+      "best": "archivist",
+      "bestMatch": "scribe",
+      "bestDescription": "You both live in the margins, just for different reasons",
+      "tension": "sentinel",
+      "tensionDescription": "They've finished the book before you've finished the first chapter"
+    },
+    "visualDirection": "Less Hogwarts, more ancient observatory. Books orbit like planetary rings. Figure is singular and commanding. Consistent starlight/luminous text treatment ties to other archetypes.",
+    "colorPalette": "Deep indigo, aged parchment gold, cool silver"
+  },
+  {
+    "id": "nocturne",
+    "name": "The Nocturne",
+    "creature": "Figure engulfed in swirling dark pages, full moon behind them, wide consuming eyes. Dissolves at the edges into ink and shadow.",
+    "readerType": "3am finishers, intensity addicts, one-sitting readers",
+    "why": "Reads to feel something so big it can't be ignored. Emotional extremity is the point, not a side effect.",
+    "genres": "Psychological fiction, dark literary fiction",
+    "exampleBooks": ["A Little Life", "Gone Girl", "The Secret History"],
+    "bio": "You don't read — you disappear. The book doesn't end until you do, and you won't let it end. You read at a frequency that most people can't access, somewhere between compulsion and communion.",
+    "superlative": "The reader most likely to finish a 700-page novel in 36 hours and immediately need to lie on the floor and stare at the ceiling.",
+    "roast": "You call it emotional intelligence. Your sleep schedule calls it something else.",
+    "strengths": ["Emotional immersion", "Stamina", "Gut instinct for character"],
+    "axes": {
+      "heartVsHead": 1,
+      "plotVsProse": 2,
+      "familiarVsFrontier": 3,
+      "lightVsDark": 5,
+      "realVsImagined": 3
+    },
+    "compatibility": {
+      "bestMatch": "revenant",
+      "bestDescription": "You meet at the darkest corner of every page",
+      "tension": "ember",
+      "tensionDescription": "They need the light you keep switching off"
+    },
+    "visualDirection": "Moon tarot card energy. Eyes are the key feature — wide open, consuming, lit from within. Figure partially dissolving into dark pages. Should feel like being watched back.",
+    "colorPalette": "Midnight blue-black, cold silver moon, deep violet"
+  },
+  {
+    "id": "wanderer",
+    "name": "The Wanderer",
+    "creature": "Cloaked figure in a mist-filled corridor of floating, drifting pages. The mist is made of text. Pages catch light like dust particles. Movement without destination.",
+    "readerType": "Atmosphere chasers, mood readers, slow burn loyalists",
+    "why": "Doesn't care what happens — cares how it feels to be inside the book. Plot is just an excuse for texture.",
+    "genres": "Magical realism, literary surrealism",
+    "exampleBooks": ["Piranesi", "Wind-Up Bird Chronicle", "The Night Circus"],
+    "bio": "You read to get lost, not to arrive somewhere. The destination is irrelevant. The corridor, the fog, the quality of light through a window described on page 47 — that's why you're here.",
+    "superlative": "The reader most likely to abandon a plot-driven thriller because the writing wasn't doing it for them, and to feel completely fine about this.",
+    "roast": "You've been 'almost finished' with the same book for three weeks and you're not even a little sorry.",
+    "strengths": ["Atmosphere absorption", "Patience", "Emotional texture memory"],
+    "axes": {
+      "heartVsHead": 2,
+      "plotVsProse": 5,
+      "familiarVsFrontier": 4,
+      "lightVsDark": 3,
+      "realVsImagined": 4
+    },
+    "compatibility": {
+      "bestMatch": "heretic",
+      "bestDescription": "Neither of you can be pinned to a genre or a feeling",
+      "tension": "sentinel",
+      "tensionDescription": "They finished before you found the right mood to begin"
+    },
+    "visualDirection": "Mist is made of text, not fog. Drifting pages catch light like dust particles. Cloaked figure, direction unclear. Sense of beautiful purposelessness.",
+    "colorPalette": "Soft grey-lavender, warm fog white, muted sage"
+  },
+  {
+    "id": "oracle",
+    "name": "The Oracle",
+    "creature": "Seated figure, still and centered. A glowing orb before them made of compressed pages and text — dense as a collapsed star. Introspective, not powerful.",
+    "readerType": "Memoir readers, autofiction devotees, self-seekers",
+    "why": "Reads to understand themselves. Every book is held up like a mirror. Underlines sentences that feel personally prophetic.",
+    "genres": "Memoir, autofiction, personal essays",
+    "exampleBooks": ["Crying in H Mart", "Normal People", "On Earth We're Briefly Gorgeous"],
+    "bio": "Every book you've ever read has been, on some level, about you. You're not narcissistic — you're searching. The text is a map and you're trying to figure out which part marks where you are.",
+    "superlative": "The reader most likely to text a passage to someone they're thinking about at midnight, no context, no explanation.",
+    "roast": "You've recommended the same five books to everyone in your life and you're running out of people to give them to.",
+    "strengths": ["Self-awareness", "Emotional precision", "Deep empathy"],
+    "axes": {
+      "heartVsHead": 1,
+      "plotVsProse": 3,
+      "familiarVsFrontier": 1,
+      "lightVsDark": 3,
+      "realVsImagined": 1
+    },
+    "compatibility": {
+      "bestMatch": "conjurer",
+      "bestDescription": "You both believe every book is secretly about being human",
+      "tension": "cartographer",
+      "tensionDescription": "They need to leave this world; you're still trying to understand the one you're in"
+    },
+    "visualDirection": "Orb is compressed and dense — a collapsed star made of book pages. Figure is still, seated. Not a power pose. The light comes from the object, not the person.",
+    "colorPalette": "Warm amber, soft rose gold, deep cream"
+  },
+  {
+    "id": "cartographer",
+    "name": "The Cartographer",
+    "creature": "Figure whose coat or hands are star charts bleeding into fantasy terrain. A person who is also a map. The border between explorer and world has dissolved.",
+    "readerType": "World-builders, lore devotees, fantasy and sci-fi loyalists",
+    "why": "Reads to go somewhere that doesn't exist. The bigger and more intricate the world, the better. Reads the appendices.",
+    "genres": "Epic fantasy, hard sci-fi",
+    "exampleBooks": ["Dune", "The Left Hand of Darkness", "The Name of the Wind"],
+    "bio": "You don't suspend disbelief — you move in permanently. You want internal consistency, invented languages, political systems with real consequences, and a map in the front pages that you will reference constantly.",
+    "superlative": "The reader most likely to know the population of a fictional city and have opinions about its governance structure.",
+    "roast": "You've been 'worldbuilding' in your head for so long that real life feels under-developed.",
+    "strengths": ["World immersion", "Systems thinking", "Lore retention"],
+    "axes": {
+      "heartVsHead": 3,
+      "plotVsProse": 2,
+      "familiarVsFrontier": 5,
+      "lightVsDark": 3,
+      "realVsImagined": 5
+    },
+    "compatibility": {
+      "bestMatch": "archivist",
+      "bestDescription": "You map the outer worlds; they map the inner ones",
+      "tension": "oracle",
+      "tensionDescription": "They want to stay close to home; you need to leave entirely"
+    },
+    "visualDirection": "Star charts bleeding into fantasy maps across their coat and hands. Figure integrated into the map itself. Sense of being both the explorer and the territory.",
+    "colorPalette": "Deep teal, constellation gold, dark navy"
+  },
+  {
+    "id": "scribe",
+    "name": "The Scribe",
+    "creature": "Figure in profile, fully absorbed, writing with a quill. The words left behind are luminous — starlight trails left by the text itself, not the tool.",
+    "readerType": "Craft worshippers, slow readers, prose-first people",
+    "why": "Reads a paragraph three times not because they didn't understand it, but because they loved it. The how matters more than the what.",
+    "genres": "Quiet literary fiction, Booker-adjacent",
+    "exampleBooks": ["Never Let Me Go", "Remains of the Day", "Gilead"],
+    "bio": "You read the way a musician listens to music — not just for the song but for every individual decision that made it. The sentence is the unit of meaning for you, and a perfect one stops you cold.",
+    "superlative": "The reader most likely to reread the first page of a book before starting chapter two, just to experience it again.",
+    "roast": "You've DNF'd books for prose crimes. Specifically, adverbs.",
+    "strengths": ["Craft sensitivity", "Close reading", "Quality instinct"],
+    "axes": {
+      "heartVsHead": 4,
+      "plotVsProse": 5,
+      "familiarVsFrontier": 3,
+      "lightVsDark": 3,
+      "realVsImagined": 2
+    },
+    "compatibility": {
+      "bestMatch": "seer",
+      "bestDescription": "You both care about whose voice is telling the story and how",
+      "tension": "nocturne",
+      "tensionDescription": "Their intensity breaks the rhythm you're trying to protect"
+    },
+    "visualDirection": "Figure in profile, absorbed. Starlight trails left by the words themselves, not the quill tip. The luminosity is in what's been written, not what's being written.",
+    "colorPalette": "Warm parchment, soft gold, deep ink blue"
+  },
+  {
+    "id": "sentinel",
+    "name": "The Sentinel",
+    "creature": "Armored figure mid-sprint, armor covered in text like an illuminated manuscript. A glowing bound volume functions as both weapon and shield. Purposeful, not aggressive.",
+    "readerType": "Adrenaline readers, plot-first, always-has-a-theory",
+    "why": "Reads to find out what happens. Patience for description is limited. Will spoil themselves and not apologize.",
+    "genres": "Thrillers, sci-fi action, propulsive fiction",
+    "exampleBooks": ["Dark Matter", "Project Hail Mary", "Gone Girl"],
+    "bio": "You read for momentum. The book is a puzzle and you are solving it, and you will not put it down until you know. You have theories. You are often right. You have spoiled things for yourself and felt zero regret.",
+    "superlative": "The reader most likely to read the last page of a book first and claim this is a completely reasonable thing to do.",
+    "roast": "You skimmed four pages of description to get to the dialogue and you'd do it again.",
+    "strengths": ["Plot instinct", "Narrative momentum", "Predictive reading"],
+    "axes": {
+      "heartVsHead": 3,
+      "plotVsProse": 1,
+      "familiarVsFrontier": 3,
+      "lightVsDark": 3,
+      "realVsImagined": 3
+    },
+    "compatibility": {
+      "bestMatch": "ember",
+      "bestDescription": "You both need to know what happens; they just need it to end well",
+      "tension": "wanderer",
+      "tensionDescription": "They're still on page one. You finished at 2am."
+    },
+    "visualDirection": "Armor made of text, like an illuminated manuscript. The book-as-shield is the distinctive element — glowing at the spine. Mid-stride energy. Not aggressive, just inexorable.",
+    "colorPalette": "Steel blue, burnished copper, bright white glow"
+  },
+  {
+    "id": "heretic",
+    "name": "The Heretic",
+    "creature": "Figure holding a cracked spine. Prismatic light explodes from the fractures — the breaking is generative, not destructive. Light source comes from within the book.",
+    "readerType": "Genre benders, contrarians, anti-canon readers",
+    "why": "Allergic to hype. Reads across categories with zero loyalty to any. Will tell you why the beloved book was actually mid.",
+    "genres": "Literary sci-fi, experimental fiction",
+    "exampleBooks": ["Cloud Atlas", "Slaughterhouse-Five", "Station Eleven"],
+    "bio": "You trust your own taste more than any bestseller list, prize committee, or cultural consensus. The canonical books got there somehow, and you're not sure the process was rigorous. You read everything and owe nothing.",
+    "superlative": "The reader most likely to say 'I mean it was fine' about a book everyone else considers life-changing.",
+    "roast": "Contrarianism is a reading strategy. You've decided.",
+    "strengths": ["Range", "Critical instinct", "Zero trend anxiety"],
+    "axes": {
+      "heartVsHead": 4,
+      "plotVsProse": 3,
+      "familiarVsFrontier": 5,
+      "lightVsDark": 3,
+      "realVsImagined": 3
+    },
+    "compatibility": {
+      "bestMatch": "wanderer",
+      "bestDescription": "Neither of you can be pinned to a genre or an expectation",
+      "tension": "archivist",
+      "tensionDescription": "They've built a system you're constitutionally allergic to"
+    },
+    "visualDirection": "Cracked spine as the key image. Prismatic light from inside — the breaking is generative. The figure should look like they caused this on purpose and are pleased about it.",
+    "colorPalette": "Fractured rainbow prismatic, deep charcoal, electric white"
+  },
+  {
+    "id": "ember",
+    "name": "The Ember",
+    "creature": "Quiet figure cradling a small flame in cupped hands — precious, almost extinguished. Warm amber light falls on surrounding book spines. Books arranged like a nest, not a tower.",
+    "readerType": "Hope-seekers, redemption arc devotees, comfort readers",
+    "why": "Uses books as evidence that things turn out okay. Not naive — just needs the light at the end. Cries at the good parts, not just the sad ones.",
+    "genres": "Uplifting literary fiction, narrative nonfiction",
+    "exampleBooks": ["A Man Called Ove", "Educated", "The Midnight Library"],
+    "bio": "You know the world can be hard. You know books can be hard. You choose them anyway, because you need to believe in the arc. Not blindly — you've read the darkness. You just also need to know it can bend.",
+    "superlative": "The reader most likely to cry when a character finally gets something they deserved all along.",
+    "roast": "You've cried at a book dedication. Before the first chapter.",
+    "strengths": ["Emotional resilience", "Hope literacy", "Character investment"],
+    "axes": {
+      "heartVsHead": 1,
+      "plotVsProse": 2,
+      "familiarVsFrontier": 2,
+      "lightVsDark": 1,
+      "realVsImagined": 2
+    },
+    "compatibility": {
+      "bestMatch": "conjurer",
+      "bestDescription": "You both believe books should leave you better than they found you",
+      "tension": "revenant",
+      "tensionDescription": "They find beauty in exactly what you find haunting"
+    },
+    "visualDirection": "The flame is small and cupped — almost extinguished, not blazing. Books as a nest around the figure. Warm amber palette. This is quiet, not triumphant.",
+    "colorPalette": "Warm amber, soft gold, deep burnt orange"
+  },
+  {
+    "id": "revenant",
+    "name": "The Revenant",
+    "creature": "Translucent figure half-merged with a dark tome. Shadow tendrils extend like roots, not threats — organic, deliberate. Half-present, half-absorbed into the text.",
+    "readerType": "Gothic devotees, horror readers, darkness dwellers",
+    "why": "Reads toward the uncomfortable on purpose. Finds catharsis in dread. Suspicious of books that wrap up too neatly.",
+    "genres": "Gothic fiction, horror, Southern Gothic",
+    "exampleBooks": ["Mexican Gothic", "Beloved", "Haunting of Hill House"],
+    "bio": "You understand something most readers avoid: the dark parts are where the real things live. You don't read horror to be scared. You read it to be understood. The uncomfortable ending is the honest one.",
+    "superlative": "The reader most likely to argue that the bleak ending was actually the most compassionate choice the author could have made.",
+    "roast": "Your book recommendations come with a 'you'll be fine, probably' disclaimer.",
+    "strengths": ["Darkness fluency", "Thematic depth", "Emotional courage"],
+    "axes": {
+      "heartVsHead": 2,
+      "plotVsProse": 3,
+      "familiarVsFrontier": 3,
+      "lightVsDark": 5,
+      "realVsImagined": 4
+    },
+    "compatibility": {
+      "bestMatch": "nocturne",
+      "bestDescription": "You haunt the same literary edges, for the same reasons",
+      "tension": "ember",
+      "tensionDescription": "Their hope is the thing you're most suspicious of"
+    },
+    "visualDirection": "Shadow tendrils as roots, not threats — organic, not aggressive. Figure translucent, half-merged. The book is absorbing them, not the other way around.",
+    "colorPalette": "Dark forest green, deep shadow black, cold bone white"
+  },
+  {
+    "id": "seer",
+    "name": "The Seer",
+    "creature": "Figure with a third eye barely open — quiet perception, not blazing power. Faces orbit subtly around them like memories or dreams. Restraint is the visual key.",
+    "readerType": "Multi-POV collectors, empathy readers, perspective maximalists",
+    "why": "Reads to inhabit lives nothing like their own. Gets frustrated by single-perspective narratives. Always asking whose story isn't being told.",
+    "genres": "Multi-POV literary fiction, postcolonial literature",
+    "exampleBooks": ["Americanah", "The Sympathizer", "A Visit from the Goon Squad"],
+    "bio": "You read to multiply yourself. One perspective is never enough — you need the version from the other side of the room, the other side of the world, the other side of history. You collect points of view the way others collect books.",
+    "superlative": "The reader most likely to be frustrated that a novel 'only' has one narrator, even if that narrator is extraordinary.",
+    "roast": "You've read the same historical event from four different cultural perspectives and you're not done yet.",
+    "strengths": ["Perspective range", "Empathy breadth", "Structural awareness"],
+    "axes": {
+      "heartVsHead": 3,
+      "plotVsProse": 3,
+      "familiarVsFrontier": 4,
+      "lightVsDark": 3,
+      "realVsImagined": 2
+    },
+    "compatibility": {
+      "bestMatch": "scribe",
+      "bestDescription": "You both care about whose voice is telling the story and how",
+      "tension": "cartographer",
+      "tensionDescription": "They want to escape this world; you want to witness it more carefully"
+    },
+    "visualDirection": "Third eye barely open — restraint is key. Orbiting faces subtle, like a dream or a memory. Not a power image. A perception image.",
+    "colorPalette": "Dusky purple, soft rose, deep grey-blue"
+  },
+  {
+    "id": "conjurer",
+    "name": "The Conjurer",
+    "creature": "Two books touching spine-to-spine, hearts forming in the space between them. The figure is secondary — they've stepped back to watch the connection they created happen.",
+    "readerType": "Romance devotees, connection chasers, relationship-first readers",
+    "why": "Reads for the relationship at the center — romantic, platonic, or familial. Will forgive weak plot if the emotional core is real.",
+    "genres": "Romance, love stories, relationship-driven literary fiction",
+    "exampleBooks": ["Call Me by Your Name", "Pride and Prejudice", "The Time Traveler's Wife"],
+    "bio": "The plot is scaffolding. What you're really here for is the moment two people understand each other — or fail to, in the specific, devastating way only this pair could fail. You read for the between.",
+    "superlative": "The reader most likely to reread the last 40 pages of a love story three times before fully closing the book.",
+    "roast": "You have strong opinions about fictional couples that would alarm a therapist.",
+    "strengths": ["Emotional attunement", "Relationship reading", "Heart-first instinct"],
+    "axes": {
+      "heartVsHead": 1,
+      "plotVsProse": 2,
+      "familiarVsFrontier": 2,
+      "lightVsDark": 2,
+      "realVsImagined": 2
+    },
+    "compatibility": {
+      "bestMatch": "oracle",
+      "bestDescription": "You both read to understand what it means to love and be loved",
+      "tension": "heretic",
+      "tensionDescription": "They'll tell you the romance was the weakest part of the book"
+    },
+    "visualDirection": "The two books touching is the hero image. Hearts form in the negative space between them. The figure is secondary, having stepped back. Connection is the subject, not the person.",
+    "colorPalette": "Soft rose, warm gold, deep burgundy"
+  }
+]
