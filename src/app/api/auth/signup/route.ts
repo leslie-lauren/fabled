@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase";
-import { createClient } from "@supabase/supabase-js";
+import { createServerClient, createAnonClient } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,35 +14,55 @@ export async function POST(req: NextRequest) {
     }
 
     // Use anon client for auth signup (so session is created properly)
-    const anonClient = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const anonClient = createAnonClient();
 
-    const { data, error: authError } = await anonClient.auth.signUp({
-      email,
-      password,
-      options: { data: { display_name: displayName } },
-    });
+    let data, authError;
+    try {
+      const res = await anonClient.auth.signUp({
+        email,
+        password,
+        options: { data: { display_name: displayName } },
+      });
+      data = res.data;
+      authError = res.error;
+    } catch (err) {
+      console.error("[signup] supabase.auth.signUp threw:", err);
+      const msg = err instanceof Error ? err.message : String(err);
+      return NextResponse.json(
+        { error: `Auth service unreachable: ${msg}` },
+        { status: 502 },
+      );
+    }
 
     if (authError) {
+      console.warn("[signup] authError:", authError.message);
       return NextResponse.json({ error: authError.message }, { status: 400 });
     }
 
     if (!data.user) {
-      return NextResponse.json({ error: "Signup failed." }, { status: 500 });
+      return NextResponse.json({ error: "Signup failed (no user returned)." }, { status: 500 });
     }
 
     // Use service role client to insert user row (bypasses RLS)
-    const serviceClient = createServerClient();
-    const { error: insertError } = await serviceClient.from("users").insert({
-      id: data.user.id,
-      email,
-      display_name: displayName,
-    });
+    try {
+      const serviceClient = createServerClient();
+      const { error: insertError } = await serviceClient.from("users").insert({
+        id: data.user.id,
+        email,
+        display_name: displayName,
+      });
 
-    if (insertError && !insertError.message.includes("duplicate")) {
-      return NextResponse.json({ error: insertError.message }, { status: 500 });
+      if (insertError && !insertError.message.includes("duplicate")) {
+        console.warn("[signup] insertError:", insertError.message);
+        return NextResponse.json({ error: insertError.message }, { status: 500 });
+      }
+    } catch (err) {
+      console.error("[signup] users insert threw:", err);
+      const msg = err instanceof Error ? err.message : String(err);
+      return NextResponse.json(
+        { error: `Database unreachable: ${msg}` },
+        { status: 502 },
+      );
     }
 
     return NextResponse.json({
@@ -51,7 +70,8 @@ export async function POST(req: NextRequest) {
       session: data.session,
     });
   } catch (err) {
-    console.error("Signup error:", err);
-    return NextResponse.json({ error: "Something went wrong." }, { status: 500 });
+    console.error("[signup] unhandled error:", err);
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `Signup failed: ${msg}` }, { status: 500 });
   }
 }

@@ -21,6 +21,7 @@ function GenerateAuraContent() {
   const [userId, setUserId] = useState<string | null>(null);
   const [savedBooks, setSavedBooks] = useState<string[]>([]);
   const [hasTribes, setHasTribes] = useState(false);
+  const [backTarget, setBackTarget] = useState<string>("/welcome");
   const [joinCode, setJoinCode] = useState("");
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinError, setJoinError] = useState("");
@@ -36,7 +37,10 @@ function GenerateAuraContent() {
         .from("tribe_members")
         .select("tribe_id")
         .eq("user_id", session.user.id);
-      if (memberships && memberships.length > 0) setHasTribes(true);
+      if (memberships && memberships.length > 0) {
+        setHasTribes(true);
+        setBackTarget("/home");
+      }
     });
   }, [router]);
 
@@ -91,14 +95,12 @@ function GenerateAuraContent() {
   return (
     <div className="min-h-dvh px-5 py-8 pb-20">
       {/* Header */}
-      {hasTribes && (
-        <button
-          onClick={() => router.push("/home")}
-          className="text-muted-2 text-sm mb-4 hover:text-text-secondary transition-colors"
-        >
-          ← Home
-        </button>
-      )}
+      <button
+        onClick={() => router.push(backTarget)}
+        className="text-muted-2 text-sm mb-4 hover:text-text-secondary transition-colors"
+      >
+        ← Back
+      </button>
       <div className="text-center mb-8">
         <h1 className="font-display text-2xl font-bold">Fabled</h1>
       </div>

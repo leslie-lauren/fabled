@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# supabase CLI local state
+supabase/.temp/
+
+# superseded prototype archive (kept locally, not in repo)
+prototypes/old/

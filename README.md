@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fabled
 
-## Getting Started
+**A whimsical book club.** Discover your reading aura, form a tribe with friends, swipe on AI-curated blind book descriptions, and discuss your reads with AI-generated conversation prompts.
 
-First, run the development server:
+Fabled is a mobile-first web app that turns reading taste into a mystical, shareable identity — and then uses it to help small groups of friends decide what to read together.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+> Discover your reading aura. Swipe on books blind. Discuss with your tribe.
+
+---
+
+## What it does
+
+**🔮 Reading Aura** — Enter a handful of books you love and an LLM generates your reading personality: one of 12 archetypes, a three-color aura, a short bio, and your position on five reading dimensions. Each archetype renders as a unique, hand-built SVG illustration tinted in your personal aura colors.
+
+**👥 Tribes** — Create or join a tribe with a 6-character invite code. Tribes are small reading groups that move through a shared loop together.
+
+**🃏 Blind Swipe Decks** — The app generates a deck of book descriptions with titles and authors hidden, so the group votes on the *writing and premise* rather than the cover or the hype. Members swipe, then matches are revealed.
+
+**💬 AI Discussion** — Once a tribe has read a pick, Fabled generates conversation prompts tailored to the book and the group.
+
+### The core loop
+
+```
+Generate aura → Create / join a tribe → Swipe a blind deck → Reveal matches → Vote → Read → Discuss → Repeat
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### The 12 archetypes
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The Archivist · The Nocturne · The Wanderer · The Oracle · The Cartographer · The Scribe · The Sentinel · The Heretic · The Ember · The Revenant · The Seer · The Conjurer
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Each is scored across five axes: **Heart↔Head**, **Plot↔Prose**, **Familiar↔Frontier**, **Light↔Dark**, and **Real↔Imagined**, with best-match and creative-tension pairings between archetypes.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Tech stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Next.js 16** (App Router) + **React 19**
+- **TypeScript**
+- **Tailwind CSS 4**
+- **Supabase** — Postgres, auth, and realtime
+- **Anthropic API** (Claude) for aura generation, deck curation, and discussion prompts — called only from server-side API routes, never exposed to the client
+- **Vercel** for hosting
+- **html2canvas** for shareable aura cards
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Architecture
 
-## Deploy on Vercel
+```
+src/
+  app/
+    api/              Server-side routes (auth, aura generation, tribes, swipe, vote, discussion)
+    aura/             Aura generation + profile views
+    tribes/           Create, join, swipe, reveal, discuss
+    welcome/ home/    Onboarding and dashboard
+  components/
+    aura/             Aura card, axis bars, share card, info modals
+    characters/       12 unique SVG archetype illustrations
+    swipe/            Swipe deck UI
+    layout/ ui/       Navigation and shared primitives
+  data/               Archetype definitions + AI prompt templates
+  lib/                Supabase client, types, tribe helpers
+supabase/             Schema + migrations
+prototypes/           Early design explorations (JSX)
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Every Claude call lives behind a Next.js route handler in `src/app/api/` so the API key stays server-side. Aura generation, blind-deck curation, and discussion prompts are all structured LLM calls.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Running locally
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Configure environment
+cp .env.example .env.local
+# then fill in the values (see below)
+
+# 3. Start the dev server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+### Environment variables
+
+| Variable | Purpose |
+|---|---|
+| `ANTHROPIC_API_KEY` | Server-side Claude calls (aura, decks, discussion) |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-side privileged Supabase access |
+
+Database schema and migrations live in [`supabase/`](supabase/).
+
+---
+
+## Status
+
+Active personal project — the core aura, tribe, swipe, and discussion flows are built. Not yet open to contributions.
+
+Built by [Leslie Busick](https://github.com/leslie-lauren).

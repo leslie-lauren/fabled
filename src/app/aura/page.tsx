@@ -4,10 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import type { Aura } from "@/lib/types";
-import { getArchetype } from "@/data/archetypes";
 import AuraCard from "@/components/aura/aura-card";
 import BookRow from "@/components/aura/book-row";
-import CharacterIllustration from "@/components/characters";
+import ShareCard from "@/components/aura/share-card";
 import BottomNav from "@/components/layout/bottom-nav";
 
 interface PastRead {
@@ -98,65 +97,24 @@ export default function MyAuraPage() {
     });
   }, [router]);
 
-  async function handleShare(withTribe: boolean) {
+  async function handleShare() {
     setSharing(true);
     try {
       const html2canvas = (await import("html2canvas")).default;
       const card = shareCardRef.current;
       if (!card) { setSharing(false); return; }
 
-      // Clone the capture card into a wrapper appended to <body>.
-      // The wrapper is visible (so html2canvas computes all styles)
-      // but hidden from the user by an opaque overlay behind it and
-      // overflow:hidden + fixed dimensions on the wrapper itself.
-      const overlay = document.createElement("div");
-      overlay.style.cssText = "position:fixed;inset:0;z-index:99998;background:#000;";
-      document.body.appendChild(overlay);
-
-      const wrapper = document.createElement("div");
-      wrapper.style.cssText = "position:fixed;left:0;top:0;width:340px;height:604px;z-index:99999;overflow:hidden;";
-      const clone = card.cloneNode(true) as HTMLElement;
-      clone.style.display = "block";
-      clone.style.position = "relative";
-      clone.style.width = "340px";
-      clone.style.height = "604px";
-      wrapper.appendChild(clone);
-      document.body.appendChild(wrapper);
-
-      // Let the browser compute layout and styles across two frames
-      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-
-      // Update tribe invite text if needed
-      const tribeInviteEl = clone.querySelector("[data-tribe-invite]") as HTMLElement;
-      if (tribeInviteEl) {
-        if (withTribe && selectedTribeForShare) {
-          const tribe = userTribes.find((t) => t.id === selectedTribeForShare);
-          if (tribe) {
-            tribeInviteEl.style.display = "block";
-            tribeInviteEl.innerHTML = `<span style="font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:0.12em;color:rgba(255,255,255,0.5)">Join my tribe: </span><span style="font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.15em;color:rgba(255,255,255,0.7)">${tribe.invite_code}</span>`;
-          }
-        } else {
-          tribeInviteEl.style.display = "none";
-        }
-      }
-
-      // Wait one more frame after tribe invite update
-      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-
-      // Capture the 340×604 card at 3.176x scale → outputs 1080×1920 PNG
-      const scaleFactor = 1080 / 340;
-      const canvas = await html2canvas(clone, {
+      // Capture the ShareCard at its NATIVE 1080×1920 resolution.
+      // It's rendered offscreen (left:-10000px) at full size so html2canvas
+      // gets pixel-perfect output with no scaling math.
+      const canvas = await html2canvas(card, {
         backgroundColor: null,
-        width: 340,
-        height: 604,
-        scale: scaleFactor,
+        width: 1080,
+        height: 1920,
+        scale: 1,
+        windowWidth: 1080,
+        windowHeight: 1920,
       });
-
-      console.log(`[share] canvas: ${canvas.width}x${canvas.height}`);
-
-      // Clean up: remove cloned card and overlay
-      document.body.removeChild(wrapper);
-      document.body.removeChild(overlay);
 
       canvas.toBlob(async (blob) => {
         if (!blob) { setSharing(false); return; }
@@ -177,7 +135,6 @@ export default function MyAuraPage() {
           URL.revokeObjectURL(url);
         }
         setSharing(false);
-        setShowShare(false);
       }, "image/png");
     } catch {
       setSharing(false);
@@ -312,134 +269,113 @@ export default function MyAuraPage() {
         </div>
       )}
 
-      {/* Share Modal — card preview + share options */}
+      {/* Share Modal — SINGLE ShareCard component for preview + capture.
+          Preview = full-size card scaled down visually via CSS transform.
+          Capture = same card rendered offscreen at native 1080×1920. */}
       {showShare && aura && (() => {
-        const sc1 = aura.color_primary;
-        const sc2 = aura.color_secondary;
-        const sc3 = aura.color_tertiary;
-        const archetype = getArchetype(aura.archetype);
-        const monthName = new Date().toLocaleString("default", { month: "long" }).toUpperCase();
-        const bonusGrid = [
-          { emoji: "✨", label: `${monthName} BOOK-SCOPE`, text: aura.book_scope || "", clamp: 6 },
-          { emoji: "🧚", label: "SOUL READ", text: aura.spirit_book || "", clamp: 3 },
-          { emoji: "🚩", label: "READING RED FLAG", text: aura.roast || "", clamp: 6 },
-          { emoji: "🔮", label: "YOUR EPILOGUE", text: aura.prediction_2036 || "", clamp: 6 },
-        ];
-
-        // Card content renderer — always at 340×604 base size (no scale factor needed)
-        const renderCardContent = () => (
-          <>
-            {/* Gradient bg */}
-            <div style={{ position: "absolute", inset: 0, background: `linear-gradient(170deg, ${sc1}DD 0%, ${sc3}BB 20%, #0D0B10 45%, #0D0B10 65%, ${sc3}99 85%, ${sc2}77 100%)` }} />
-            <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 40% 10%, rgba(255,255,255,0.12) 0%, transparent 45%), radial-gradient(ellipse at 60% 90%, rgba(255,255,255,0.06) 0%, transparent 40%)" }} />
-            <div style={{ position: "absolute", top: 12, left: 12, right: 12, bottom: 12, border: "1px solid rgba(255,255,255,0.06)", borderRadius: 14, pointerEvents: "none" as const }} />
-
-            <div style={{ position: "relative", zIndex: 1, padding: "18px 20px 14px" }}>
-              {/* Header */}
-              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 7, letterSpacing: "0.2em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", textAlign: "center", marginBottom: 4 }}>
-                MY READING AURA
-              </div>
-              {/* Character */}
-              <div style={{ width: 70, height: 82, margin: "0 auto 2px" }}>
-                <CharacterIllustration archetype={aura.archetype} c1={sc1} c2={sc2} c3={sc3} />
-              </div>
-              {/* Name */}
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, fontWeight: 700, color: "#F5F0E8", lineHeight: 1.05, textAlign: "center", marginBottom: 4, textShadow: "0 1.5px 8px rgba(0,0,0,0.4)" }}>
-                {archetype?.name || aura.archetype}
-              </div>
-              {/* Bio — 2 lines max */}
-              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 8, color: "rgba(245,240,232,0.6)", lineHeight: 1.5, textAlign: "center", marginBottom: 6, padding: "0 6px", overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>
-                {aura.bio}
-              </div>
-              {/* Strength pills — flex centered vertically */}
-              <div style={{ display: "flex", justifyContent: "center", gap: 4, flexWrap: "nowrap" as const, marginBottom: 8, overflow: "hidden" }}>
-                {aura.strengths.map((str, i) => (
-                  <span key={i} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "2px 8px", borderRadius: 20, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(245,240,232,0.8)", fontSize: 7, fontFamily: "'DM Sans', sans-serif", fontWeight: 500, whiteSpace: "nowrap" as const, lineHeight: 1.4 }}>
-                    {str}
-                  </span>
-                ))}
-              </div>
-              {/* 2x2 Grid */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, marginBottom: 8 }}>
-                {bonusGrid.map((item, i) => (
-                  <div key={i} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "8px 6px", textAlign: "center", display: "flex", flexDirection: "column" as const, alignItems: "center", height: 110, overflow: "hidden" }}>
-                    <div style={{ fontSize: 12, marginBottom: 2 }}>{item.emoji}</div>
-                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 5, color: "rgba(255,255,255,0.35)", letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: 3 }}>
-                      {item.label}
-                    </div>
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 8, fontStyle: "italic", color: "rgba(245,240,232,0.7)", lineHeight: 1.4, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: item.clamp, WebkitBoxOrient: "vertical" as const }}>
-                      {item.text}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {/* Gold CTA */}
-              <div style={{ background: "rgba(196,149,106,0.12)", border: "1px solid rgba(196,149,106,0.2)", borderRadius: 10, padding: "7px 12px", textAlign: "center", marginBottom: 5 }}>
-                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 11, fontWeight: 600, color: "rgba(245,240,232,0.9)", marginBottom: 2 }}>
-                  What&apos;s your reading aura?
-                </div>
-                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 7, color: "rgba(196,149,106,0.7)" }}>
-                  join-fabled.vercel.app
-                </div>
-              </div>
-              {/* Tribe invite */}
-              <div data-tribe-invite style={{ display: "none", textAlign: "center", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "5px 10px", marginBottom: 5, fontFamily: "'JetBrains Mono', monospace", fontSize: 7, color: "rgba(255,255,255,0.4)" }} />
-              {/* Branding */}
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 7, color: "rgba(255,255,255,0.18)", letterSpacing: "0.08em" }}>fabled</div>
-                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 5, color: "rgba(255,255,255,0.1)", fontStyle: "italic", marginTop: 1 }}>a whimsical book club</div>
-              </div>
-            </div>
-          </>
-        );
-
-        const cardContainerStyle: React.CSSProperties = {
-          width: 340, height: 604, borderRadius: 20, overflow: "hidden",
-          position: "relative", flexShrink: 0,
-          fontFamily: "'DM Sans', sans-serif", color: "#F5F0E8",
-        };
+        const activeTribe = userTribes.find((t) => t.id === selectedTribeForShare);
+        const tribeCode = activeTribe?.invite_code || null;
+        const PREVIEW_SCALE = 340 / 1080; // 0.31481…
+        const PREVIEW_W = 340;
+        const PREVIEW_H = Math.round(1920 * PREVIEW_SCALE); // 604
 
         return (
-          <>
-            {/* Modal overlay with card preview */}
-            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 animate-fadeIn" style={{ background: "rgba(0,0,0,0.85)" }} onClick={() => setShowShare(false)}>
-              <div onClick={(e) => e.stopPropagation()} className="flex flex-col items-center">
-                {/* Card preview — 340×604, fixed size; also the capture source */}
-                <div ref={shareCardRef} style={{ ...cardContainerStyle, boxShadow: "0 8px 40px rgba(0,0,0,0.5)" }}>
-                  {renderCardContent()}
-                </div>
+          <div
+            className="fixed inset-0 z-50 overflow-y-auto animate-fadeIn"
+            style={{ background: "#0A090C" }}
+          >
+            {/* Close button — top right */}
+            <button
+              onClick={() => setShowShare(false)}
+              className="fixed top-4 right-4 z-10 w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+              style={{
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                color: "#F5F0E8",
+              }}
+              aria-label="Close"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
 
-                {/* Share options below card */}
-                <div className="mt-5 w-[340px] space-y-2.5">
-                  {userTribes.length > 0 && (
-                    <>
-                      {userTribes.length > 1 && (
-                        <select
-                          value={selectedTribeForShare || ""}
-                          onChange={(e) => setSelectedTribeForShare(e.target.value)}
-                          className="w-full bg-bg border border-muted-5/30 rounded-xl px-3 py-2 text-text text-sm"
-                        >
-                          {userTribes.map((t) => (
-                            <option key={t.id} value={t.id}>{t.name}</option>
-                          ))}
-                        </select>
-                      )}
-                      <button onClick={() => handleShare(true)} disabled={sharing} className="btn-primary w-full text-sm">
-                        {sharing ? "Generating..." : "Share with tribe invite"}
-                      </button>
-                    </>
-                  )}
-                  <button onClick={() => handleShare(false)} disabled={sharing} className="btn-ghost w-full text-sm">
-                    {sharing ? "Generating..." : "Share without tribe invite"}
-                  </button>
-                  <button onClick={() => setShowShare(false)} className="text-muted-2 text-xs w-full text-center pt-1 hover:text-text-secondary transition-colors">
-                    Cancel
-                  </button>
+            {/* Scrollable content — preview card + controls */}
+            <div className="min-h-full flex flex-col items-center justify-start px-5 pt-14 pb-10">
+              <p className="label-mono text-center mb-4 text-[10px] tracking-[0.25em]" style={{ color: "#7A756D" }}>
+                SHARE MY READING AURA
+              </p>
+
+              {/* Scaled preview: fixed-size window that crops the transformed ShareCard.
+                  transform-origin: top left so the scaled card fills from (0,0). */}
+              <div
+                style={{
+                  width: PREVIEW_W,
+                  height: PREVIEW_H,
+                  overflow: "hidden",
+                  borderRadius: 20,
+                  boxShadow: "0 10px 50px rgba(0,0,0,0.6)",
+                  flexShrink: 0,
+                }}
+              >
+                <div
+                  style={{
+                    transform: `scale(${PREVIEW_SCALE})`,
+                    transformOrigin: "top left",
+                    width: 1080,
+                    height: 1920,
+                  }}
+                >
+                  <ShareCard aura={aura} tribeCode={tribeCode} />
                 </div>
+              </div>
+
+              {/* Controls */}
+              <div className="mt-6 w-full max-w-[340px] space-y-2.5">
+                {userTribes.length > 1 && (
+                  <select
+                    value={selectedTribeForShare || ""}
+                    onChange={(e) => setSelectedTribeForShare(e.target.value)}
+                    className="w-full bg-bg border border-muted-5/30 rounded-xl px-3 py-2 text-text text-sm"
+                  >
+                    <option value="">No tribe invite</option>
+                    {userTribes.map((t) => (
+                      <option key={t.id} value={t.id}>Include {t.name} invite</option>
+                    ))}
+                  </select>
+                )}
+                <button
+                  onClick={handleShare}
+                  disabled={sharing}
+                  className="btn-primary w-full text-sm"
+                >
+                  {sharing ? "Generating..." : "Save as Image"}
+                </button>
+                <p className="text-muted-3 text-[11px] text-center italic pt-1">
+                  Saves a 1080×1920 PNG to your device. Perfect for IG Stories.
+                </p>
               </div>
             </div>
 
-          </>
+            {/* Offscreen capture source — SAME ShareCard component, rendered at
+                native 1080×1920. Positioned far offscreen so user never sees it,
+                but still in the DOM so html2canvas can capture it. */}
+            <div
+              ref={shareCardRef}
+              style={{
+                position: "fixed",
+                left: -10000,
+                top: 0,
+                width: 1080,
+                height: 1920,
+                pointerEvents: "none",
+              }}
+              aria-hidden="true"
+            >
+              <ShareCard aura={aura} tribeCode={tribeCode} />
+            </div>
+          </div>
         );
       })()}
 
