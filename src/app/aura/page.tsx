@@ -104,6 +104,14 @@ export default function MyAuraPage() {
       const card = shareCardRef.current;
       if (!card) { setSharing(false); return; }
 
+      // Wait for web fonts to finish loading. With next/font's display:swap,
+      // capturing before fonts are ready makes html2canvas rasterize fallback
+      // fonts, whose different metrics overflow the fixed 1080×1920 frame and
+      // push the footer/CTA off the exported story image.
+      if (document.fonts?.ready) {
+        try { await document.fonts.ready; } catch { /* fonts API unsupported */ }
+      }
+
       // Capture the ShareCard at its NATIVE 1080×1920 resolution.
       // It's rendered offscreen (left:-10000px) at full size so html2canvas
       // gets pixel-perfect output with no scaling math.

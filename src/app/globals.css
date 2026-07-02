@@ -17,9 +17,9 @@
   --color-success: #6BCB77;
   --color-error: #E85D5D;
 
-  --font-display: "Playfair Display", serif;
-  --font-body: "DM Sans", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-display: var(--font-playfair), "Playfair Display", serif;
+  --font-body: var(--font-dm-sans), "DM Sans", sans-serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", monospace;
 }
 
 /* Animations */

@@ -37,7 +37,7 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
         height: 1920,
         position: "relative",
         overflow: "hidden",
-        fontFamily: "'DM Sans', sans-serif",
+        fontFamily: "var(--font-body)",
         color: "#F5F0E8",
         flexShrink: 0,
       }}
@@ -77,7 +77,7 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
         {/* 'MY READING AURA' header */}
         <div
           style={{
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: "var(--font-mono)",
             fontSize: 20,
             letterSpacing: "0.25em",
             textTransform: "uppercase",
@@ -97,7 +97,7 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
         {/* Archetype Name */}
         <div
           style={{
-            fontFamily: "'Playfair Display', serif",
+            fontFamily: "var(--font-display)",
             fontSize: 80,
             fontWeight: 700,
             color: "#F5F0E8",
@@ -113,7 +113,7 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
         {/* Bio — 2 lines max */}
         <div
           style={{
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "var(--font-body)",
             fontSize: 24,
             color: "rgba(245,240,232,0.65)",
             lineHeight: 1.5,
@@ -125,6 +125,9 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
+            // html2canvas ignores -webkit-line-clamp; an explicit maxHeight
+            // keeps the exported PNG clipped to the same box (24 * 1.5 * 2).
+            maxHeight: 72,
           }}
         >
           {aura.bio}
@@ -153,7 +156,7 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
                 border: "2px solid rgba(255,255,255,0.12)",
                 color: "rgba(245,240,232,0.85)",
                 fontSize: 20,
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "var(--font-body)",
                 fontWeight: 500,
                 whiteSpace: "nowrap",
                 lineHeight: 1.4,
@@ -191,7 +194,7 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
               <div style={{ fontSize: 36, marginBottom: 6 }}>{item.emoji}</div>
               <div
                 style={{
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: "var(--font-mono)",
                   fontSize: 14,
                   color: "rgba(255,255,255,0.4)",
                   letterSpacing: "0.12em",
@@ -203,7 +206,7 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
               </div>
               <div
                 style={{
-                  fontFamily: "'DM Sans', sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: 22,
                   fontStyle: "italic",
                   color: "rgba(245,240,232,0.75)",
@@ -213,6 +216,8 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
                   display: "-webkit-box",
                   WebkitLineClamp: item.clamp,
                   WebkitBoxOrient: "vertical",
+                  // html2canvas ignores -webkit-line-clamp; clip to matching box.
+                  maxHeight: Math.round(22 * 1.4 * item.clamp),
                 }}
               >
                 {item.text}
@@ -234,7 +239,7 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
         >
           <div
             style={{
-              fontFamily: "'Playfair Display', serif",
+              fontFamily: "var(--font-display)",
               fontSize: 34,
               fontWeight: 700,
               color: "rgba(245,240,232,0.92)",
@@ -245,7 +250,7 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
           </div>
           <div
             style={{
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: 20,
               color: "rgba(196,149,106,0.8)",
             }}
@@ -268,7 +273,7 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
           >
             <span
               style={{
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: "var(--font-mono)",
                 fontSize: 18,
                 letterSpacing: "0.12em",
                 color: "rgba(255,255,255,0.5)",
@@ -278,7 +283,7 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
             </span>
             <span
               style={{
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: "var(--font-mono)",
                 fontSize: 22,
                 letterSpacing: "0.18em",
                 color: "rgba(255,255,255,0.75)",
@@ -294,7 +299,7 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
         <div style={{ textAlign: "center" }}>
           <div
             style={{
-              fontFamily: "'Playfair Display', serif",
+              fontFamily: "var(--font-display)",
               fontSize: 28,
               color: "rgba(255,255,255,0.2)",
               letterSpacing: "0.1em",
@@ -304,7 +309,7 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
           </div>
           <div
             style={{
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: 16,
               color: "rgba(255,255,255,0.12)",
               fontStyle: "italic",
