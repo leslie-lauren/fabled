@@ -70,9 +70,17 @@ export default function RevealPage() {
   // Aura modal state
   const [selectedMemberAura, setSelectedMemberAura] = useState<{ name: string; aura: Aura; isLeader: boolean } | null>(null);
 
-  const voteableBooks = results.filter(
+  const strongMatches = results.filter(
     (b) => b.tier === "Everyone loved this" || b.tier === "Strong match"
   );
+  // Fallback: if nothing reached "Strong match" (e.g. a small tribe with no
+  // shared favorites), let the tribe vote on the top picks by match so the
+  // flow never dead-ends in the reveal state.
+  const voteableBooks =
+    strongMatches.length > 0
+      ? strongMatches
+      : [...results].sort((a, b) => b.matchPct - a.matchPct).slice(0, Math.min(3, results.length));
+  const hasStrongMatches = strongMatches.length > 0;
 
   // Votes for current round only (for counting who voted)
   const currentRoundVotes = allBookVotes.filter((v) => v.round === voteRound);
@@ -403,9 +411,13 @@ export default function RevealPage() {
               <span className="text-3xl">✦</span>
             </div>
             <h1 className="font-display text-xl font-bold mb-2">
-              Your tribe matched on {voteableBooks.length} book{voteableBooks.length !== 1 ? "s" : ""}.
+              {hasStrongMatches
+                ? `Your tribe matched on ${voteableBooks.length} book${voteableBooks.length !== 1 ? "s" : ""}.`
+                : "No runaway favorites this round."}
             </h1>
-            <p className="text-text-secondary text-sm mb-1">But you can only read one.</p>
+            <p className="text-text-secondary text-sm mb-1">
+              {hasStrongMatches ? "But you can only read one." : "Vote on your tribe's top picks."}
+            </p>
             <p className="text-muted-2 text-xs">Which one wins?</p>
           </>
         )}
@@ -583,7 +595,7 @@ export default function RevealPage() {
           {booksToShow.map((book, i) => {
             if (phase === "reveal" && i >= revealed) return null;
             const isWinner = winnerIndex === book.index && phase === "results";
-            const isVoteable = book.tier === "Everyone loved this" || book.tier === "Strong match";
+            const isVoteable = voteableBooks.some((vb) => vb.index === book.index);
             const myVote = myApprovals[book.index] || false;
             const bookVoteData = voteCounts[book.index] || { count: 0, voters: [] };
             const tierColor = book.tier === "Everyone loved this" ? "#6BCB77" : book.tier === "Strong match" ? "#C4956A" : book.tier === "Split decision" ? "#8B8580" : "#5A564F";

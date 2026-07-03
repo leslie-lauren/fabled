@@ -15,6 +15,8 @@ const STATUS_META: Record<string, { label: string; color: string }> = {
   swiping: { label: "Swiping in progress", color: "#C4956A" },
   reveal: { label: "Reveal ready", color: "#6A9BC4" },
   voting: { label: "Voting", color: "#6A9BC4" },
+  tiebreaker: { label: "Tiebreaker vote", color: "#6A9BC4" },
+  leader_pick: { label: "Leader breaks the tie", color: "#6A9BC4" },
   reading: { label: "Currently reading", color: "#6BCB77" },
 };
 
@@ -174,6 +176,14 @@ export default function TribesPage() {
                       className="btn-primary text-xs py-2 px-4 flex-1"
                     >
                       Vote for Next Read →
+                    </button>
+                  )}
+                  {(tribe.status === "tiebreaker" || tribe.status === "leader_pick") && (
+                    <button
+                      onClick={() => router.push(`/tribes/${tribe.id}/reveal`)}
+                      className="btn-primary text-xs py-2 px-4 flex-1"
+                    >
+                      Break the Tie →
                     </button>
                   )}
                   {tribe.status === "reading" && (

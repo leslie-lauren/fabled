@@ -219,6 +219,29 @@ export default function JoinByLinkPage() {
     router.push("/home");
   }
 
+  // Logged-in user without an aura: persist the previewed aura, then join.
+  async function handleSaveAndJoin() {
+    if (!userId) return;
+    setSigningUp(true);
+    setSignupError("");
+    try {
+      await fetch("/api/generate-aura", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ books, userId }),
+      });
+      await fetch("/api/tribes/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, userId }),
+      });
+      router.push("/home");
+    } catch {
+      setSignupError("Something went wrong. Please try again.");
+      setSigningUp(false);
+    }
+  }
+
   const generatingMessages = [
     "Consulting the Story Spirits...",
     "Finding your creature...",
@@ -614,15 +637,19 @@ export default function JoinByLinkPage() {
               onClick={() => {
                 if (userId) {
                   // Already logged in, save aura + join
-                  handleSignup();
+                  handleSaveAndJoin();
                 } else {
                   setPhase("signup");
                 }
               }}
+              disabled={signingUp}
               className="btn-primary w-full"
             >
-              {userId ? "Save & Join Tribe" : "Create Account & Join Tribe"}
+              {userId
+                ? signingUp ? "Saving..." : "Save & Join Tribe"
+                : "Create Account & Join Tribe"}
             </button>
+            {signupError && <p className="text-error text-sm mt-3">{signupError}</p>}
           </div>
 
           <p className="text-muted-4 text-xs italic">
