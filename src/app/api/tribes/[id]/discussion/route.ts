@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createServerClient } from "@/lib/supabase";
+import { getAuthUserId } from "@/lib/api-auth";
 import { discussionPrompt } from "@/data/ai-prompts";
 
 const anthropic = new Anthropic({
@@ -12,6 +13,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: tribeId } = await params;
+  const authId = await getAuthUserId(req);
+  if (!authId) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+
   const supabase = createServerClient();
 
   // Get tribe's current book
@@ -47,6 +51,9 @@ export async function POST(
 ) {
   try {
     const { id: tribeId } = await params;
+    const authId = await getAuthUserId(req);
+    if (!authId) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+
     const supabase = createServerClient();
 
     const { data: tribe } = await supabase

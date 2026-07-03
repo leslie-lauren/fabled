@@ -3,8 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { apiFetch } from "@/lib/api-client";
+import { useToast } from "@/components/ui/toast";
 import type { Aura } from "@/lib/types";
 import { fetchTribeWithMembers, type TribeWithMembers } from "@/lib/tribe-helpers";
+import { getArchetype } from "@/data/archetypes";
 import BottomNav from "@/components/layout/bottom-nav";
 import MemberAuraModal from "@/components/aura/member-aura-modal";
 import CharacterIllustration from "@/components/characters";
@@ -22,8 +25,10 @@ export default function TribeDetailPage() {
   const router = useRouter();
   const params = useParams();
   const tribeId = params.id as string;
+  const { toast } = useToast();
 
   const [tribe, setTribe] = useState<TribeWithMembers | null>(null);
+  const [bookCount, setBookCount] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [generatingDeck, setGeneratingDeck] = useState(false);
@@ -43,6 +48,13 @@ export default function TribeDetailPage() {
       const t = await fetchTribeWithMembers(supabase, tribeId);
       if (!t) { router.replace("/home"); return; }
       setTribe(t);
+
+      const { count } = await supabase
+        .from("tribe_book_history")
+        .select("*", { count: "exact", head: true })
+        .eq("tribe_id", tribeId);
+      setBookCount(count || 0);
+
       setLoading(false);
     }
     load();
@@ -51,43 +63,45 @@ export default function TribeDetailPage() {
   async function handleGenerateDeck() {
     if (!userId) return;
     setGeneratingDeck(true);
-    const res = await fetch(`/api/tribes/${tribeId}/generate-deck`, {
+    const res = await apiFetch(`/api/tribes/${tribeId}/generate-deck`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId }),
     });
     const data = await res.json();
     setGeneratingDeck(false);
     if (res.ok) {
       router.push(`/tribes/${tribeId}/swipe`);
     } else {
-      alert(data.error || "Failed to summon books");
+      toast("error", data.error || "Failed to summon books");
     }
   }
 
   async function handleTransferLeadership(newLeaderId: string) {
-    const res = await fetch("/api/tribes/leader", {
+    const res = await apiFetch("/api/tribes/leader", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tribeId, currentLeaderId: userId, newLeaderId }),
+      body: JSON.stringify({ tribeId, newLeaderId }),
     });
     if (res.ok) {
       setConfirmTransfer(null);
       const t = await fetchTribeWithMembers(supabase, tribeId);
       if (t) setTribe(t);
+      toast("success", "Leadership transferred.");
+    } else {
+      toast("error", "Couldn't transfer leadership.");
     }
   }
 
   async function handleRemoveMember(memberId: string) {
-    const res = await fetch("/api/tribes/remove-member", {
+    const res = await apiFetch("/api/tribes/remove-member", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tribeId, leaderId: userId, memberId }),
+      body: JSON.stringify({ tribeId, memberId }),
     });
     if (res.ok) {
       setConfirmRemove(null);
       const t = await fetchTribeWithMembers(supabase, tribeId);
       if (t) setTribe(t);
+      toast("success", "Member removed.");
+    } else {
+      toast("error", "Couldn't remove member.");
     }
   }
 
@@ -116,6 +130,34 @@ export default function TribeDetailPage() {
       </div>
     );
   }
+
+  // Aura chemistry: find best-match ("twins") and tension ("opposites") pairs
+  // among members, grounded in each archetype's compatibility data.
+  const auraMembers = tribe.members.filter((m) => m.aura);
+  const twins: { a: string; b: string; desc: string }[] = [];
+  const opposites: { a: string; b: string; desc: string }[] = [];
+  for (let i = 0; i < auraMembers.length; i++) {
+    for (let j = i + 1; j < auraMembers.length; j++) {
+      const a = auraMembers[i];
+      const b = auraMembers[j];
+      const archA = getArchetype(a.aura!.archetype);
+      const archB = getArchetype(b.aura!.archetype);
+      if (!archA || !archB) continue;
+      if (archA.compatibility.bestMatch === b.aura!.archetype) {
+        twins.push({ a: a.display_name, b: b.display_name, desc: archA.compatibility.bestDescription });
+      } else if (archB.compatibility.bestMatch === a.aura!.archetype) {
+        twins.push({ a: b.display_name, b: a.display_name, desc: archB.compatibility.bestDescription });
+      } else if (archA.compatibility.tension === b.aura!.archetype) {
+        opposites.push({ a: a.display_name, b: b.display_name, desc: archA.compatibility.tensionDescription });
+      } else if (archB.compatibility.tension === a.aura!.archetype) {
+        opposites.push({ a: b.display_name, b: a.display_name, desc: archB.compatibility.tensionDescription });
+      }
+    }
+  }
+  const chemistry = [
+    ...twins.slice(0, 2).map((t) => ({ ...t, type: "twin" as const })),
+    ...opposites.slice(0, 2).map((t) => ({ ...t, type: "opposite" as const })),
+  ];
 
   const statusColor =
     tribe.status === "reading" ? "#6BCB77" :
@@ -209,10 +251,47 @@ export default function TribeDetailPage() {
         </div>
       </div>
 
+      {/* Tribe chemistry */}
+      {chemistry.length > 0 && (
+        <div className="mb-6">
+          <p className="label-mono mb-3">Tribe Chemistry</p>
+          <div className="space-y-2">
+            {chemistry.map((c, i) => (
+              <div
+                key={i}
+                className="p-3 rounded-xl"
+                style={{
+                  background: c.type === "twin" ? "#6BCB7708" : "#6A9BC408",
+                  border: `1px solid ${c.type === "twin" ? "#6BCB7718" : "#6A9BC418"}`,
+                }}
+              >
+                <p className="text-sm text-text">
+                  <span className="mr-1">{c.type === "twin" ? "✦" : "⚡"}</span>
+                  <span className="font-medium">{c.a}</span>
+                  {c.type === "twin" ? " & " : " vs "}
+                  <span className="font-medium">{c.b}</span>
+                  <span className="text-muted-2">
+                    {c.type === "twin" ? " are aura twins" : " are opposites"}
+                  </span>
+                </p>
+                <p className="text-muted-2 text-xs mt-0.5 italic">{c.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Current book */}
       {tribe.current_book_title && (
         <div className="card mb-6" style={{ background: "#6BCB7708", border: "1px solid #6BCB7712" }}>
-          <p className="label-mono mb-1 text-success">Currently Reading</p>
+          <div className="flex items-center justify-between mb-1">
+            <p className="label-mono text-success">Currently Reading</p>
+            {bookCount > 0 && (
+              <p className="text-muted-2 text-xs">
+                {bookCount === 1 ? "1st book together" : `${bookCount} books together`}
+              </p>
+            )}
+          </div>
           <p className="text-text font-medium">{tribe.current_book_title}</p>
           <p className="text-muted-1 text-sm">{tribe.current_book_author}</p>
         </div>

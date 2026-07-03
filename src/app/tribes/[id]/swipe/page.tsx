@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { apiFetch } from "@/lib/api-client";
+import { haptic } from "@/lib/haptics";
 import SwipeCard from "@/components/swipe/swipe-card";
 import MemberPill from "@/components/ui/member-pill";
 import type { DeckBook } from "@/lib/types";
@@ -27,7 +29,8 @@ export default function SwipePage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [votes, setVotes] = useState<boolean[]>([]);
   const [tribeName, setTribeName] = useState("");
-  const [members, setMembers] = useState<{ name: string; color: string; done: boolean }[]>([]);
+  const [members, setMembers] = useState<{ name: string; color: string; done: boolean; voteCount: number }[]>([]);
+  const [totalBooks, setTotalBooks] = useState(10);
   const [loading, setLoading] = useState(true);
   const [shuffleMsg, setShuffleMsg] = useState(0);
 
@@ -67,14 +70,15 @@ export default function SwipePage() {
         .eq("user_id", session.user.id)
         .order("book_index", { ascending: true });
 
-      const totalBooks = Array.isArray(deck.books) ? (deck.books as DeckBook[]).length : 10;
+      const deckTotal = Array.isArray(deck.books) ? (deck.books as DeckBook[]).length : 10;
+      setTotalBooks(deckTotal);
 
       if (existingVotes && existingVotes.length > 0) {
         const voteArr: boolean[] = [];
         existingVotes.forEach((v) => { voteArr[v.book_index] = v.liked; });
         setVotes(voteArr);
         setCurrentIndex(existingVotes.length);
-        if (existingVotes.length >= totalBooks) {
+        if (existingVotes.length >= deckTotal) {
           setPhase("waiting");
         }
       }
@@ -97,28 +101,33 @@ export default function SwipePage() {
           for (const a of mAuras) mAuraMap.set(a.user_id, a.color_primary);
         }
 
-        const memberList = await Promise.all(
-          memberData.map(async (m: Record<string, unknown>) => {
-            const { count } = await supabase
-              .from("swipe_votes")
-              .select("*", { count: "exact", head: true })
-              .eq("deck_id", deck.id)
-              .eq("user_id", m.user_id as string);
+        const { data: allDeckVotes } = await supabase
+          .from("swipe_votes")
+          .select("user_id")
+          .eq("deck_id", deck.id);
 
-            return {
-              name: (m.users as Record<string, string>)?.display_name || "Unknown",
-              color: mAuraMap.get(m.user_id as string) || "#C4956A",
-              done: (count || 0) >= totalBooks,
-            };
-          })
-        );
+        const voteCountByUser = new Map<string, number>();
+        for (const v of allDeckVotes || []) {
+          voteCountByUser.set(v.user_id, (voteCountByUser.get(v.user_id) || 0) + 1);
+        }
+
+        const memberList = memberData.map((m: Record<string, unknown>) => {
+          const uid = m.user_id as string;
+          const count = voteCountByUser.get(uid) || 0;
+          return {
+            name: (m.users as Record<string, string>)?.display_name || "Unknown",
+            color: mAuraMap.get(uid) || "#C4956A",
+            done: count >= deckTotal,
+            voteCount: count,
+          };
+        });
         setMembers(memberList);
       }
 
       setLoading(false);
 
       // If user already finished swiping, skip the shuffling transition
-      if (existingVotes && existingVotes.length >= totalBooks) {
+      if (existingVotes && existingVotes.length >= deckTotal) {
         // Already set to "waiting" above
       } else {
         // Show shuffling transition, then go to intro
@@ -140,7 +149,7 @@ export default function SwipePage() {
   const pollStatus = useCallback(async () => {
     if (!tribeId) return;
     try {
-      const res = await fetch(`/api/tribes/${tribeId}/swipe-status`);
+      const res = await apiFetch(`/api/tribes/${tribeId}/swipe-status`);
       const data = await res.json();
 
       if (data.status === "reveal") {
@@ -171,16 +180,15 @@ export default function SwipePage() {
   async function handleSwipe(liked: boolean) {
     if (!userId || !deckId) return;
 
+    haptic("light");
     const newVotes = [...votes];
     newVotes[currentIndex] = liked;
     setVotes(newVotes);
 
     // Save to server
-    const res = await fetch(`/api/tribes/${tribeId}/swipe`, {
+    const res = await apiFetch(`/api/tribes/${tribeId}/swipe`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userId,
         deckId,
         bookIndex: currentIndex,
         liked,
@@ -190,6 +198,7 @@ export default function SwipePage() {
     const data = await res.json();
 
     if (currentIndex + 1 >= books.length) {
+      haptic("success");
       if (data.allDone) {
         // Everyone is done, go straight to reveal
         router.push(`/tribes/${tribeId}/reveal`);
@@ -299,7 +308,9 @@ export default function SwipePage() {
                   {m.done ? (
                     <span className="text-xs font-medium text-success">Done</span>
                   ) : (
-                    <span className="text-xs font-medium text-muted-2">Swiping...</span>
+                    <span className="text-xs font-medium text-muted-2">
+                      {m.voteCount > 0 ? `${m.voteCount}/${totalBooks}` : "Swiping..."}
+                    </span>
                   )}
                 </div>
               </div>

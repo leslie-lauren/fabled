@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase";
+import { getAuthUserId } from "@/lib/api-auth";
 
 export async function POST(
   req: NextRequest,
@@ -7,7 +8,10 @@ export async function POST(
 ) {
   try {
     const { id: tribeId } = await params;
-    const { userId, deckId, bookIndex, liked } = await req.json();
+    const userId = await getAuthUserId(req);
+    if (!userId) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+
+    const { deckId, bookIndex, liked } = await req.json();
     const supabase = createServerClient();
 
     // Save vote (upsert)

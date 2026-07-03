@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { apiFetch } from "@/lib/api-client";
 
 const ACCENT = "#C4956A";
 
@@ -114,11 +115,9 @@ export default function WelcomePage() {
 
     // Ensure public.users row exists (fixes orphaned auth users from failed signups)
     if (signInData.user) {
-      await fetch("/api/auth/ensure-user", {
+      await apiFetch("/api/auth/ensure-user", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id: signInData.user.id,
           email: signInData.user.email,
           displayName: signInData.user.user_metadata?.display_name || email.split("@")[0],
         }),
@@ -515,11 +514,17 @@ export default function WelcomePage() {
             }}
           >
             By continuing, you agree to our{" "}
-            <span style={{ color: "#5A564F", cursor: "pointer", textDecoration: "underline" }}>
+            <span
+              onClick={() => router.push("/terms")}
+              style={{ color: "#5A564F", cursor: "pointer", textDecoration: "underline" }}
+            >
               Terms
             </span>{" "}
             and{" "}
-            <span style={{ color: "#5A564F", cursor: "pointer", textDecoration: "underline" }}>
+            <span
+              onClick={() => router.push("/privacy")}
+              style={{ color: "#5A564F", cursor: "pointer", textDecoration: "underline" }}
+            >
               Privacy Policy
             </span>
             .

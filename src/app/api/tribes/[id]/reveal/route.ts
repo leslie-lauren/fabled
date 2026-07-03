@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase";
+import { getAuthUserId } from "@/lib/api-auth";
 
 export async function GET(
   req: NextRequest,
@@ -7,6 +8,9 @@ export async function GET(
 ) {
   try {
     const { id: tribeId } = await params;
+    const authId = await getAuthUserId(req);
+    if (!authId) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+
     const supabase = createServerClient();
 
     // Get latest deck

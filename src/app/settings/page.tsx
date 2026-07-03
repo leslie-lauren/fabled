@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { apiFetch } from "@/lib/api-client";
 import { fetchUserTribes, type TribeWithMembers } from "@/lib/tribe-helpers";
 import BottomNav from "@/components/layout/bottom-nav";
 
@@ -48,10 +49,9 @@ export default function SettingsPage() {
 
   async function handleSaveName() {
     setSaving("name");
-    const res = await fetch("/api/account", {
+    const res = await apiFetch("/api/account", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, displayName }),
+      body: JSON.stringify({ displayName }),
     });
     const data = await res.json();
     setSaving(null);
@@ -61,10 +61,9 @@ export default function SettingsPage() {
 
   async function handleSaveEmail() {
     setSaving("email");
-    const res = await fetch("/api/account", {
+    const res = await apiFetch("/api/account", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, email }),
+      body: JSON.stringify({ email }),
     });
     const data = await res.json();
     setSaving(null);
@@ -78,10 +77,9 @@ export default function SettingsPage() {
       return;
     }
     setSaving("password");
-    const res = await fetch("/api/account", {
+    const res = await apiFetch("/api/account", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, newPassword }),
+      body: JSON.stringify({ newPassword }),
     });
     const data = await res.json();
     setSaving(null);
@@ -94,10 +92,9 @@ export default function SettingsPage() {
   }
 
   async function handleLeaveTribe(tribeId: string) {
-    const res = await fetch("/api/tribes/leave", {
+    const res = await apiFetch("/api/tribes/leave", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, tribeId }),
+      body: JSON.stringify({ tribeId }),
     });
     if (res.ok) {
       setTribes((prev) => prev.filter((t) => t.id !== tribeId));
@@ -116,10 +113,8 @@ export default function SettingsPage() {
 
   async function handleDeleteAccount() {
     setDeleting(true);
-    const res = await fetch("/api/account", {
+    const res = await apiFetch("/api/account", {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId }),
     });
     if (res.ok) {
       await supabase.auth.signOut();

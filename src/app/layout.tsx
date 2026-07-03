@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { ToastProvider } from "@/components/ui/toast";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -46,7 +47,9 @@ export default function RootLayout({
       lang="en"
       className={`${playfair.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="min-h-dvh bg-bg text-text">{children}</body>
+      <body className="min-h-dvh bg-bg text-text">
+        <ToastProvider>{children}</ToastProvider>
+      </body>
     </html>
   );
 }

@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { apiFetch } from "@/lib/api-client";
+import { useToast } from "@/components/ui/toast";
 import type { DiscussionQuestions } from "@/lib/types";
 import MemberPill from "@/components/ui/member-pill";
 import MemberAuraModal from "@/components/aura/member-aura-modal";
@@ -28,6 +30,7 @@ export default function DiscussionPage() {
   const router = useRouter();
   const params = useParams();
   const tribeId = params.id as string;
+  const { toast } = useToast();
 
   const [questions, setQuestions] = useState<DiscussionQuestions | null>(null);
   const [bookTitle, setBookTitle] = useState("");
@@ -46,7 +49,7 @@ export default function DiscussionPage() {
       if (!session) { router.replace("/welcome"); return; }
 
       // Fetch existing questions
-      const res = await fetch(`/api/tribes/${tribeId}/discussion`);
+      const res = await apiFetch(`/api/tribes/${tribeId}/discussion`);
       const data = await res.json();
 
       if (data.questions) {
@@ -96,12 +99,18 @@ export default function DiscussionPage() {
 
   async function handleGenerate() {
     setGenerating(true);
-    const res = await fetch(`/api/tribes/${tribeId}/discussion`, {
-      method: "POST",
-    });
-    const data = await res.json();
-    if (data.questions) {
-      setQuestions(data.questions);
+    try {
+      const res = await apiFetch(`/api/tribes/${tribeId}/discussion`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.questions) {
+        setQuestions(data.questions);
+      } else {
+        toast("error", data.error || "Couldn't generate questions. Try again.");
+      }
+    } catch {
+      toast("error", "Couldn't generate questions. Try again.");
     }
     setGenerating(false);
   }

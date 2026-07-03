@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase";
+import { getAuthUserId } from "@/lib/api-auth";
 
 // POST: Lock in votes (approval, tiebreaker, or leader pick)
 export async function POST(
@@ -8,7 +9,10 @@ export async function POST(
 ) {
   try {
     const { id: tribeId } = await params;
-    const { userId, deckId, approvedBookIndexes, round = 1 } = await req.json();
+    const userId = await getAuthUserId(req);
+    if (!userId) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+
+    const { deckId, approvedBookIndexes, round = 1 } = await req.json();
     const supabase = createServerClient();
 
     if (!Array.isArray(approvedBookIndexes) || approvedBookIndexes.length === 0) {
@@ -112,6 +116,17 @@ export async function POST(
             current_book_title: winner.title,
             current_book_author: winner.author,
           }).eq("id", tribeId);
+
+          // Record the chosen book so it isn't served again and to track the
+          // tribe's reading streak.
+          await supabase.from("tribe_book_history").upsert(
+            {
+              tribe_id: tribeId,
+              book_title: winner.title,
+              book_author: winner.author,
+            },
+            { onConflict: "tribe_id,book_title,book_author" }
+          );
         }
 
         return NextResponse.json({ saved: true, allVoted: true, winner: true });
@@ -143,32 +158,44 @@ export async function DELETE(
 ) {
   try {
     const { id: tribeId } = await params;
-    const { deckId, userId, round } = await req.json();
+    const userId = await getAuthUserId(req);
+    if (!userId) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+
+    const { deckId, round, scope } = await req.json();
     const supabase = createServerClient();
 
-    if (userId) {
-      // Single-user undo: delete this user's votes for the specified round
-      console.log(`[Vote] Undo R${round || 1} for user ${userId} on deck ${deckId}`);
-      let query = supabase
-        .from("book_votes")
-        .delete()
-        .eq("deck_id", deckId)
-        .eq("user_id", userId);
-      if (round) query = query.eq("round", round);
-      await query;
+    if (scope === "revote") {
+      // Full re-vote is leader-only: delete ALL votes for this deck and reset.
+      const { data: membership } = await supabase
+        .from("tribe_members")
+        .select("role")
+        .eq("tribe_id", tribeId)
+        .eq("user_id", userId)
+        .single();
+      if (membership?.role !== "leader") {
+        return NextResponse.json({ error: "Only the leader can reset the vote." }, { status: 403 });
+      }
+
+      console.log(`[Vote] Full re-vote for deck ${deckId}`);
+      await supabase.from("book_votes").delete().eq("deck_id", deckId);
+      await supabase.from("tribes").update({
+        status: "reveal",
+        current_book_title: null,
+        current_book_author: null,
+      }).eq("id", tribeId);
 
       return NextResponse.json({ ok: true });
     }
 
-    // Full re-vote: delete ALL votes for this deck (all rounds)
-    console.log(`[Vote] Full re-vote for deck ${deckId}`);
-    await supabase.from("book_votes").delete().eq("deck_id", deckId);
-
-    await supabase.from("tribes").update({
-      status: "reveal",
-      current_book_title: null,
-      current_book_author: null,
-    }).eq("id", tribeId);
+    // Single-user undo: delete the caller's own votes for the specified round.
+    console.log(`[Vote] Undo R${round || 1} for user ${userId} on deck ${deckId}`);
+    let query = supabase
+      .from("book_votes")
+      .delete()
+      .eq("deck_id", deckId)
+      .eq("user_id", userId);
+    if (round) query = query.eq("round", round);
+    await query;
 
     return NextResponse.json({ ok: true });
   } catch (err) {

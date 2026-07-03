@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { apiFetch } from "@/lib/api-client";
 import type { Aura } from "@/lib/types";
 import { getArchetype } from "@/data/archetypes";
 import CharacterIllustration from "@/components/characters";
@@ -182,17 +183,15 @@ export default function JoinByLinkPage() {
       }
 
       // Generate + save their real aura
-      await fetch("/api/generate-aura", {
+      await apiFetch("/api/generate-aura", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ books, userId: newUserId }),
+        body: JSON.stringify({ books }),
       });
 
       // Join the tribe
-      await fetch("/api/tribes/join", {
+      await apiFetch("/api/tribes/join", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, userId: newUserId }),
+        body: JSON.stringify({ code }),
       });
 
       router.push("/home");
@@ -205,10 +204,9 @@ export default function JoinByLinkPage() {
   async function handleSimpleJoin() {
     if (!userId) return;
     setSigningUp(true);
-    const res = await fetch("/api/tribes/join", {
+    const res = await apiFetch("/api/tribes/join", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code, userId }),
+      body: JSON.stringify({ code }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -225,15 +223,13 @@ export default function JoinByLinkPage() {
     setSigningUp(true);
     setSignupError("");
     try {
-      await fetch("/api/generate-aura", {
+      await apiFetch("/api/generate-aura", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ books, userId }),
+        body: JSON.stringify({ books }),
       });
-      await fetch("/api/tribes/join", {
+      await apiFetch("/api/tribes/join", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, userId }),
+        body: JSON.stringify({ code }),
       });
       router.push("/home");
     } catch {

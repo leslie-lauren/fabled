@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase";
+import { getAuthUserId } from "@/lib/api-auth";
 
 export async function POST(req: NextRequest) {
   try {
-    const { id, email, displayName } = await req.json();
+    const id = await getAuthUserId(req);
+    if (!id) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
 
-    if (!id || !email) {
+    const { email, displayName } = await req.json();
+
+    if (!email) {
       return NextResponse.json({ error: "Missing fields." }, { status: 400 });
     }
 

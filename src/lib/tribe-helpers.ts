@@ -104,12 +104,56 @@ export async function fetchUserTribes(
     .in("id", tribeIds)
     .order("created_at", { ascending: false });
 
-  if (!tribesData) return [];
+  if (!tribesData || tribesData.length === 0) return [];
 
-  const result: TribeWithMembers[] = [];
-  for (const tribe of tribesData) {
-    const members = await fetchTribeMembers(supabase, tribe.id, tribe.created_by);
-    result.push({ ...tribe, members });
+  // Batch all members + auras across every tribe (avoids N+1 queries).
+  const { data: allMemberRows } = await supabase
+    .from("tribe_members")
+    .select("tribe_id, user_id, role, users(display_name)")
+    .in("tribe_id", tribeIds);
+
+  const memberUserIds = Array.from(
+    new Set((allMemberRows || []).map((m: Record<string, unknown>) => m.user_id as string))
+  );
+
+  const auraMap = new Map<string, Aura>();
+  if (memberUserIds.length > 0) {
+    const { data: auras } = await supabase
+      .from("auras")
+      .select("*")
+      .in("user_id", memberUserIds);
+    if (auras) {
+      for (const a of auras) {
+        if (!auraMap.has(a.user_id) || a.created_at > auraMap.get(a.user_id)!.created_at) {
+          auraMap.set(a.user_id, a);
+        }
+      }
+    }
   }
-  return result;
+
+  const membersByTribe = new Map<string, MemberWithAura[]>();
+  for (const m of (allMemberRows || []) as Record<string, unknown>[]) {
+    const tribeId = m.tribe_id as string;
+    const uid = m.user_id as string;
+    const users = m.users as Record<string, string> | null;
+    const list = membersByTribe.get(tribeId) || [];
+    list.push({
+      user_id: uid,
+      display_name: users?.display_name || "Unknown",
+      role: (m.role as "leader" | "member") || "member",
+      aura: auraMap.get(uid) || null,
+    });
+    membersByTribe.set(tribeId, list);
+  }
+
+  return tribesData.map((tribe) => {
+    const members = membersByTribe.get(tribe.id) || [];
+    const hasLeader = members.some((m) => m.role === "leader");
+    if (!hasLeader && tribe.created_by) {
+      const creator = members.find((m) => m.user_id === tribe.created_by);
+      if (creator) creator.role = "leader";
+    }
+    members.sort((a, b) => (a.role === "leader" ? -1 : b.role === "leader" ? 1 : 0));
+    return { ...tribe, members };
+  });
 }

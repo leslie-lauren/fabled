@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createServerClient } from "@/lib/supabase";
+import { getAuthUserId } from "@/lib/api-auth";
 import { deckPrompt } from "@/data/ai-prompts";
 
 const anthropic = new Anthropic({
@@ -13,7 +14,9 @@ export async function POST(
 ) {
   try {
     const { id: tribeId } = await params;
-    const { userId } = await req.json();
+    const userId = await getAuthUserId(req);
+    if (!userId) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+
     const supabase = createServerClient();
 
     // Verify membership

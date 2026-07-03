@@ -3,9 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { apiFetch } from "@/lib/api-client";
+import { haptic } from "@/lib/haptics";
 import MemberPill from "@/components/ui/member-pill";
 import type { Aura } from "@/lib/types";
 import MemberAuraModal from "@/components/aura/member-aura-modal";
+import Confetti from "@/components/ui/confetti";
 
 interface RevealBook {
   title: string;
@@ -51,6 +54,7 @@ export default function RevealPage() {
   const [phase, setPhase] = useState<Phase>("reveal");
   const [revealed, setRevealed] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Voting state
   const [myApprovals, setMyApprovals] = useState<Record<number, boolean>>({});
@@ -127,7 +131,7 @@ export default function RevealPage() {
     if (!session) { router.replace("/welcome"); return; }
     setUserId(session.user.id);
 
-    const res = await fetch(`/api/tribes/${tribeId}/reveal`);
+    const res = await apiFetch(`/api/tribes/${tribeId}/reveal`);
     const data = await res.json();
 
     if (data.results) {
@@ -243,6 +247,29 @@ export default function RevealPage() {
     };
   }, [deckId, tribeId, loadData]);
 
+  // Celebrate a unanimous match when the reveal finishes.
+  useEffect(() => {
+    if (phase === "reveal" && results.length > 0 && revealed >= results.length) {
+      if (results.some((b) => b.tier === "Everyone loved this")) {
+        setShowConfetti(true);
+        haptic("celebrate");
+        const t = setTimeout(() => setShowConfetti(false), 2600);
+        return () => clearTimeout(t);
+      }
+      haptic("success");
+    }
+  }, [phase, revealed, results]);
+
+  // Celebrate the winning book when results are shown.
+  useEffect(() => {
+    if (phase === "results") {
+      setShowConfetti(true);
+      haptic("celebrate");
+      const t = setTimeout(() => setShowConfetti(false), 2600);
+      return () => clearTimeout(t);
+    }
+  }, [phase]);
+
   function handleToggle(bookIndex: number) {
     if (locked) return;
     setMyApprovals((prev) => {
@@ -263,10 +290,9 @@ export default function RevealPage() {
     } else {
       setPhase("voting");
     }
-    fetch(`/api/tribes/${tribeId}/vote`, {
+    apiFetch(`/api/tribes/${tribeId}/vote`, {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ deckId, userId, round: voteRound }),
+      body: JSON.stringify({ deckId, round: voteRound, scope: "undo" }),
     }).then(() => loadData(true));
   }
 
@@ -280,10 +306,9 @@ export default function RevealPage() {
     setLocked(true);
     setPhase("waiting");
 
-    const res = await fetch(`/api/tribes/${tribeId}/vote`, {
+    const res = await apiFetch(`/api/tribes/${tribeId}/vote`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, deckId, approvedBookIndexes: approvedIndexes, round: 1 }),
+      body: JSON.stringify({ deckId, approvedBookIndexes: approvedIndexes, round: 1 }),
     });
 
     const data = await res.json();
@@ -303,10 +328,9 @@ export default function RevealPage() {
     setLocked(true);
     setPhase("tiebreaker_waiting");
 
-    const res = await fetch(`/api/tribes/${tribeId}/vote`, {
+    const res = await apiFetch(`/api/tribes/${tribeId}/vote`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, deckId, approvedBookIndexes: [tiebreakerChoice], round: 2 }),
+      body: JSON.stringify({ deckId, approvedBookIndexes: [tiebreakerChoice], round: 2 }),
     });
 
     const data = await res.json();
@@ -318,10 +342,9 @@ export default function RevealPage() {
   async function handleLeaderPick(bookIndex: number) {
     if (!userId || !deckId) return;
 
-    await fetch(`/api/tribes/${tribeId}/vote`, {
+    await apiFetch(`/api/tribes/${tribeId}/vote`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, deckId, approvedBookIndexes: [bookIndex], round: 3 }),
+      body: JSON.stringify({ deckId, approvedBookIndexes: [bookIndex], round: 3 }),
     });
 
     loadData(true);
@@ -329,10 +352,9 @@ export default function RevealPage() {
 
   async function handleRevote() {
     if (!deckId) return;
-    await fetch(`/api/tribes/${tribeId}/vote`, {
+    await apiFetch(`/api/tribes/${tribeId}/vote`, {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ deckId }),
+      body: JSON.stringify({ deckId, scope: "revote" }),
     });
     setMyApprovals({});
     setLocked(false);
@@ -381,6 +403,7 @@ export default function RevealPage() {
 
   return (
     <div className="min-h-dvh px-4 pt-6 pb-36">
+      {showConfetti && <Confetti />}
       {/* Back */}
       <button
         onClick={() => router.push("/home")}

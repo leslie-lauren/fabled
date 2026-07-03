@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase";
+import { getAuthUserId } from "@/lib/api-auth";
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId, tribeIds } = await req.json();
+    const userId = await getAuthUserId(req);
+    const { tribeIds } = await req.json();
     const supabase = createServerClient();
 
     if (!userId || !Array.isArray(tribeIds) || tribeIds.length === 0) {

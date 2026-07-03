@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { apiFetch } from "@/lib/api-client";
 import BottomNav from "@/components/layout/bottom-nav";
 
 export default function JoinTribePage() {
@@ -24,10 +25,9 @@ export default function JoinTribePage() {
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/tribes/join", {
+    const res = await apiFetch("/api/tribes/join", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: code.toUpperCase(), userId }),
+      body: JSON.stringify({ code: code.toUpperCase() }),
     });
     const data = await res.json();
 

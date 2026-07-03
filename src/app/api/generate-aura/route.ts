@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createServerClient } from "@/lib/supabase";
+import { getAuthUserId } from "@/lib/api-auth";
 import { auraPrompt } from "@/data/ai-prompts";
 import { ARCHETYPE_IDS } from "@/data/archetypes";
 
@@ -10,18 +11,16 @@ const anthropic = new Anthropic({
 
 export async function POST(req: NextRequest) {
   try {
-    const { books, userId } = await req.json();
+    const userId = await getAuthUserId(req);
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+
+    const { books } = await req.json();
 
     if (!books || !Array.isArray(books) || books.length < 3 || books.length > 7) {
       return NextResponse.json(
         { error: "Please provide 3-7 books." },
-        { status: 400 }
-      );
-    }
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: "User ID is required." },
         { status: 400 }
       );
     }

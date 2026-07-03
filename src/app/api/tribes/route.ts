@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase";
+import { getAuthUserId } from "@/lib/api-auth";
 
 function generateInviteCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // No 0/O/1/I for readability
@@ -12,7 +13,10 @@ function generateInviteCode(): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, userId } = await req.json();
+    const userId = await getAuthUserId(req);
+    if (!userId) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+
+    const { name } = await req.json();
 
     if (!name || name.length > 30) {
       return NextResponse.json(

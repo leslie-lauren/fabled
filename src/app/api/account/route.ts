@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase";
+import { getAuthUserId } from "@/lib/api-auth";
 
 // Update display name
 export async function PATCH(req: NextRequest) {
   try {
-    const { userId, displayName, email, currentPassword, newPassword } = await req.json();
+    const userId = await getAuthUserId(req);
+    if (!userId) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+
+    const { displayName, email, newPassword } = await req.json();
     const supabase = createServerClient();
 
     // Update display name
@@ -46,7 +50,9 @@ export async function PATCH(req: NextRequest) {
 // Delete account
 export async function DELETE(req: NextRequest) {
   try {
-    const { userId } = await req.json();
+    const userId = await getAuthUserId(req);
+    if (!userId) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+
     const supabase = createServerClient();
 
     // Remove from all tribes

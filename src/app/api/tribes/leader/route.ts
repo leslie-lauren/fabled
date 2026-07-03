@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase";
+import { getAuthUserId } from "@/lib/api-auth";
 
 // Transfer leadership
 export async function POST(req: NextRequest) {
   try {
-    const { tribeId, currentLeaderId, newLeaderId } = await req.json();
+    const currentLeaderId = await getAuthUserId(req);
+    if (!currentLeaderId) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+
+    const { tribeId, newLeaderId } = await req.json();
     const supabase = createServerClient();
 
     // Verify current user is leader

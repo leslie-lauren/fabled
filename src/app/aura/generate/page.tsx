@@ -3,6 +3,8 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { apiFetch } from "@/lib/api-client";
+import { haptic } from "@/lib/haptics";
 import BookInput from "@/components/aura/book-input";
 import LoadingScreen from "@/components/aura/loading-screen";
 import AuraCard from "@/components/aura/aura-card";
@@ -51,10 +53,9 @@ function GenerateAuraContent() {
     setError("");
 
     try {
-      const res = await fetch("/api/generate-aura", {
+      const res = await apiFetch("/api/generate-aura", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ books, userId }),
+        body: JSON.stringify({ books }),
       });
 
       const data = await res.json();
@@ -65,6 +66,7 @@ function GenerateAuraContent() {
 
       setAura(data.aura);
       setPhase("result");
+      haptic("celebrate");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setPhase("input");
@@ -76,10 +78,9 @@ function GenerateAuraContent() {
     setJoinLoading(true);
     setJoinError("");
 
-    const res = await fetch("/api/tribes/join", {
+    const res = await apiFetch("/api/tribes/join", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: joinCode.toUpperCase(), userId }),
+      body: JSON.stringify({ code: joinCode.toUpperCase() }),
     });
     const data = await res.json();
 

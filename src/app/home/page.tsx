@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { apiFetch } from "@/lib/api-client";
+import { useToast } from "@/components/ui/toast";
 import type { Aura } from "@/lib/types";
 import { fetchUserTribes, type TribeWithMembers } from "@/lib/tribe-helpers";
 import BottomNav from "@/components/layout/bottom-nav";
@@ -32,6 +34,7 @@ interface TribeProgress {
 export default function HomePage() {
   const router = useRouter();
   const pathname = usePathname();
+  const { toast } = useToast();
   const [userId, setUserId] = useState<string | null>(null);
   const [aura, setAura] = useState<Aura | null>(null);
   const [tribes, setTribes] = useState<TribeWithMembers[]>([]);
@@ -43,17 +46,15 @@ export default function HomePage() {
   async function handleGenerateDeck(tribeId: string) {
     if (!userId) return;
     setGeneratingDeck(tribeId);
-    const res = await fetch(`/api/tribes/${tribeId}/generate-deck`, {
+    const res = await apiFetch(`/api/tribes/${tribeId}/generate-deck`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId }),
     });
     const data = await res.json();
     setGeneratingDeck(null);
     if (res.ok) {
       router.push(`/tribes/${tribeId}/swipe`);
     } else {
-      alert(data.error || "Failed to summon books");
+      toast("error", data.error || "Failed to summon books");
     }
   }
 
@@ -61,10 +62,9 @@ export default function HomePage() {
     const tribeIds = userTribes.map((t) => t.id);
     if (tribeIds.length === 0) return;
     try {
-      const res = await fetch("/api/home-status", {
+      const res = await apiFetch("/api/home-status", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: uid, tribeIds }),
+        body: JSON.stringify({ tribeIds }),
       });
       const data = await res.json();
       setTribeProgress(data);
@@ -95,6 +95,23 @@ export default function HomePage() {
         return;
       }
       setAura(auraData);
+
+      // Honor a pending invite carried through the auth flow (?joinCode=CODE).
+      const joinCode = new URLSearchParams(window.location.search).get("joinCode");
+      if (joinCode) {
+        window.history.replaceState({}, "", "/home");
+        const joinRes = await apiFetch("/api/tribes/join", {
+          method: "POST",
+          body: JSON.stringify({ code: joinCode.toUpperCase() }),
+        });
+        if (joinRes.ok) {
+          const joinData = await joinRes.json();
+          if (joinData.tribe?.id) {
+            router.push(`/tribes/${joinData.tribe.id}`);
+            return;
+          }
+        }
+      }
 
       const userTribes = await fetchUserTribes(supabase, session.user.id);
       setTribes(userTribes);
