@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import type { Aura } from "@/lib/types";
 import AuraCard from "@/components/aura/aura-card";
 import BookRow from "@/components/aura/book-row";
-import ShareCard from "@/components/aura/share-card";
+import ShareAuraModal from "@/components/aura/share-aura-modal";
 import BottomNav from "@/components/layout/bottom-nav";
 
 interface PastRead {
@@ -28,9 +28,6 @@ export default function MyAuraPage() {
   const [pastReads, setPastReads] = useState<PastRead[]>([]);
   const [showShare, setShowShare] = useState(false);
   const [userTribes, setUserTribes] = useState<TribeInfo[]>([]);
-  const [selectedTribeForShare, setSelectedTribeForShare] = useState<string | null>(null);
-  const [sharing, setSharing] = useState(false);
-  const shareCardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -91,63 +88,10 @@ export default function MyAuraPage() {
           .in("id", allTribeIds);
         if (allTribes) {
           setUserTribes(allTribes);
-          setSelectedTribeForShare(allTribes[allTribes.length - 1]?.id || null);
         }
       }
     });
   }, [router]);
-
-  async function handleShare() {
-    setSharing(true);
-    try {
-      const html2canvas = (await import("html2canvas")).default;
-      const card = shareCardRef.current;
-      if (!card) { setSharing(false); return; }
-
-      // Wait for web fonts to finish loading. With next/font's display:swap,
-      // capturing before fonts are ready makes html2canvas rasterize fallback
-      // fonts, whose different metrics overflow the fixed 1080×1920 frame and
-      // push the footer/CTA off the exported story image.
-      if (document.fonts?.ready) {
-        try { await document.fonts.ready; } catch { /* fonts API unsupported */ }
-      }
-
-      // Capture the ShareCard at its NATIVE 1080×1920 resolution.
-      // It's rendered offscreen (left:-10000px) at full size so html2canvas
-      // gets pixel-perfect output with no scaling math.
-      const canvas = await html2canvas(card, {
-        backgroundColor: null,
-        width: 1080,
-        height: 1920,
-        scale: 1,
-        windowWidth: 1080,
-        windowHeight: 1920,
-      });
-
-      canvas.toBlob(async (blob) => {
-        if (!blob) { setSharing(false); return; }
-        const file = new File([blob], "my-reading-aura.png", { type: "image/png" });
-
-        if (navigator.share && navigator.canShare?.({ files: [file] })) {
-          try {
-            await navigator.share({ files: [file], title: "My Reading Aura on Fabled" });
-          } catch {
-            // User cancelled share
-          }
-        } else {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "my-reading-aura.png";
-          a.click();
-          URL.revokeObjectURL(url);
-        }
-        setSharing(false);
-      }, "image/png");
-    } catch {
-      setSharing(false);
-    }
-  }
 
   function handleRegenerate() {
     if (!showConfirm) {
@@ -277,115 +221,15 @@ export default function MyAuraPage() {
         </div>
       )}
 
-      {/* Share Modal — SINGLE ShareCard component for preview + capture.
-          Preview = full-size card scaled down visually via CSS transform.
-          Capture = same card rendered offscreen at native 1080×1920. */}
-      {showShare && aura && (() => {
-        const activeTribe = userTribes.find((t) => t.id === selectedTribeForShare);
-        const tribeCode = activeTribe?.invite_code || null;
-        const PREVIEW_SCALE = 340 / 1080; // 0.31481…
-        const PREVIEW_W = 340;
-        const PREVIEW_H = Math.round(1920 * PREVIEW_SCALE); // 604
-
-        return (
-          <div
-            className="fixed inset-0 z-50 overflow-y-auto animate-fadeIn"
-            style={{ background: "#0A090C" }}
-          >
-            {/* Close button — top right */}
-            <button
-              onClick={() => setShowShare(false)}
-              className="fixed top-4 right-4 z-10 w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-              style={{
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                color: "#F5F0E8",
-              }}
-              aria-label="Close"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-
-            {/* Scrollable content — preview card + controls */}
-            <div className="min-h-full flex flex-col items-center justify-start px-5 pt-14 pb-10">
-              <p className="label-mono text-center mb-4 text-[10px] tracking-[0.25em]" style={{ color: "#7A756D" }}>
-                SHARE MY READING AURA
-              </p>
-
-              {/* Scaled preview: fixed-size window that crops the transformed ShareCard.
-                  transform-origin: top left so the scaled card fills from (0,0). */}
-              <div
-                style={{
-                  width: PREVIEW_W,
-                  height: PREVIEW_H,
-                  overflow: "hidden",
-                  borderRadius: 20,
-                  boxShadow: "0 10px 50px rgba(0,0,0,0.6)",
-                  flexShrink: 0,
-                }}
-              >
-                <div
-                  style={{
-                    transform: `scale(${PREVIEW_SCALE})`,
-                    transformOrigin: "top left",
-                    width: 1080,
-                    height: 1920,
-                  }}
-                >
-                  <ShareCard aura={aura} tribeCode={tribeCode} />
-                </div>
-              </div>
-
-              {/* Controls */}
-              <div className="mt-6 w-full max-w-[340px] space-y-2.5">
-                {userTribes.length > 1 && (
-                  <select
-                    value={selectedTribeForShare || ""}
-                    onChange={(e) => setSelectedTribeForShare(e.target.value)}
-                    className="w-full bg-bg border border-muted-5/30 rounded-xl px-3 py-2 text-text text-sm"
-                  >
-                    <option value="">No tribe invite</option>
-                    {userTribes.map((t) => (
-                      <option key={t.id} value={t.id}>Include {t.name} invite</option>
-                    ))}
-                  </select>
-                )}
-                <button
-                  onClick={handleShare}
-                  disabled={sharing}
-                  className="btn-primary w-full text-sm"
-                >
-                  {sharing ? "Generating..." : "Save as Image"}
-                </button>
-                <p className="text-muted-3 text-[11px] text-center italic pt-1">
-                  Saves a 1080×1920 PNG to your device. Perfect for IG Stories.
-                </p>
-              </div>
-            </div>
-
-            {/* Offscreen capture source — SAME ShareCard component, rendered at
-                native 1080×1920. Positioned far offscreen so user never sees it,
-                but still in the DOM so html2canvas can capture it. */}
-            <div
-              ref={shareCardRef}
-              style={{
-                position: "fixed",
-                left: -10000,
-                top: 0,
-                width: 1080,
-                height: 1920,
-                pointerEvents: "none",
-              }}
-              aria-hidden="true"
-            >
-              <ShareCard aura={aura} tribeCode={tribeCode} />
-            </div>
-          </div>
-        );
-      })()}
+      {/* Share Modal — reusable component shared with the aura reveal. */}
+      {aura && (
+        <ShareAuraModal
+          aura={aura}
+          open={showShare}
+          onClose={() => setShowShare(false)}
+          tribes={userTribes}
+        />
+      )}
 
       <BottomNav />
     </div>

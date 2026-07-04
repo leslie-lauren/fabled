@@ -8,6 +8,7 @@ import { haptic } from "@/lib/haptics";
 import BookInput from "@/components/aura/book-input";
 import LoadingScreen from "@/components/aura/loading-screen";
 import AuraCard from "@/components/aura/aura-card";
+import ShareAuraModal from "@/components/aura/share-aura-modal";
 import type { Aura } from "@/lib/types";
 
 type Phase = "input" | "loading" | "result" | "transition" | "find-tribe";
@@ -27,6 +28,7 @@ function GenerateAuraContent() {
   const [joinCode, setJoinCode] = useState("");
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinError, setJoinError] = useState("");
+  const [showShare, setShowShare] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -133,15 +135,29 @@ function GenerateAuraContent() {
         <div className="max-w-sm mx-auto animate-fadeInUp">
           <AuraCard aura={aura} />
 
-          <div className="mt-8">
+          <div className="mt-8 flex flex-col gap-2.5">
+            <button
+              onClick={() => setShowShare(true)}
+              className="btn-primary w-full"
+            >
+              Share My Aura
+            </button>
             <button
               onClick={() => setPhase("transition")}
-              className="btn-primary w-full"
+              className="btn-ghost w-full"
             >
               Continue
             </button>
           </div>
         </div>
+      )}
+
+      {aura && (
+        <ShareAuraModal
+          aura={aura}
+          open={showShare}
+          onClose={() => setShowShare(false)}
+        />
       )}
 
       {phase === "transition" && (
