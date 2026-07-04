@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createServerClient } from "@/lib/supabase";
 import { getAuthUserId } from "@/lib/api-auth";
-import { auraPrompt } from "@/data/ai-prompts";
+import { auraPrompt, AI_MODEL } from "@/data/ai-prompts";
 import { ARCHETYPE_IDS } from "@/data/archetypes";
 
 const anthropic = new Anthropic({
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     const prompt = auraPrompt(books);
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: AI_MODEL,
       max_tokens: 1400,
       messages: [{ role: "user", content: prompt }],
     });

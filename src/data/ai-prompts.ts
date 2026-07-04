@@ -1,5 +1,7 @@
 import { ARCHETYPES } from "./archetypes";
 
+export const AI_MODEL = "claude-sonnet-4-5-20250929";
+
 export function auraPrompt(books: string[]): string {
   const archetypeList = ARCHETYPES.map(
     (a) => `- ${a.name}: ${a.readerType}. ${a.why}`

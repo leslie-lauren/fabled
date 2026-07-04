@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createServerClient } from "@/lib/supabase";
 import { getAuthUserId } from "@/lib/api-auth";
-import { discussionPrompt } from "@/data/ai-prompts";
+import { discussionPrompt, AI_MODEL } from "@/data/ai-prompts";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -69,7 +69,7 @@ export async function POST(
     const prompt = discussionPrompt(tribe.current_book_title, tribe.current_book_author || "Unknown");
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: AI_MODEL,
       max_tokens: 1500,
       messages: [{ role: "user", content: prompt }],
     });

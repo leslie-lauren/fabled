@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createServerClient } from "@/lib/supabase";
 import { getAuthUserId } from "@/lib/api-auth";
-import { deckPrompt } from "@/data/ai-prompts";
+import { deckPrompt, AI_MODEL } from "@/data/ai-prompts";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -112,7 +112,7 @@ export async function POST(
     let deckData;
     for (let attempt = 0; attempt < 3; attempt++) {
       const message = await anthropic.messages.create({
-        model: "claude-sonnet-4-20250514",
+        model: AI_MODEL,
         max_tokens: 4000,
         messages: [{ role: "user", content: prompt }],
       });
