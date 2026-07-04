@@ -245,6 +245,19 @@ function GenerateAuraContent() {
                 Use invite code: {inviteCode}
               </button>
             )}
+
+            {/* No friends yet? Explore solo */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-muted-5/30" />
+              <span className="text-muted-3 text-xs">no invite?</span>
+              <div className="flex-1 h-px bg-muted-5/30" />
+            </div>
+            <button
+              onClick={() => router.push("/discover")}
+              className="btn-ghost w-full"
+            >
+              Discover books for you
+            </button>
           </div>
 
           {hasTribes && (

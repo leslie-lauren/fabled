@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 const TABS = [
   { label: "Home", icon: "🏠", path: "/home" },
+  { label: "Discover", icon: "📚", path: "/discover" },
   { label: "Tribes", icon: "👥", path: "/tribes" },
   { label: "My Aura", icon: "✦", path: "/aura" },
 ];

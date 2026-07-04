@@ -376,6 +376,25 @@ export default function HomePage() {
         <span className="text-muted-3 text-lg">›</span>
       </button>
 
+      {/* Discover / For You */}
+      <button
+        onClick={() => router.push("/discover")}
+        className="w-full card mb-6 flex items-center gap-4 text-left"
+        style={{
+          background: "linear-gradient(135deg, rgba(196,149,106,0.08), transparent)",
+          border: "1px solid rgba(196,149,106,0.15)",
+        }}
+      >
+        <div className="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center text-xl" style={{ background: "rgba(196,149,106,0.12)" }}>
+          📚
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-display text-base font-semibold text-text">Discover books for you</p>
+          <p className="text-muted-1 text-[11px] mt-0.5">Swipe blind on picks matched to your aura</p>
+        </div>
+        <span className="text-muted-3 text-lg">›</span>
+      </button>
+
       {/* Tribes */}
       <div className="mb-6">
         <p className="label-mono mb-3">Your Tribes</p>
