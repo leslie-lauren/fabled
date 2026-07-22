@@ -13,12 +13,40 @@ import ShareCard from "@/components/aura/share-card";
  * Visit on desktop, zoom out (Cmd+-) to see the full frame, then screenshot
  * for review.
  */
+// ?mock=<archetype-id> renders sample data without auth/DB (for layout review)
+const MOCK_AURA: Aura = {
+  id: "mock",
+  user_id: "mock",
+  archetype: "seeker",
+  color_primary: "#D9A96B",
+  color_secondary: "#6B8F71",
+  color_tertiary: "#4A6FA5",
+  bio: "You read to find the thread that ties everything together. Every book is a step on a longer journey toward meaning.",
+  superlative: "The reader most likely to close a book, sit in silence, and quietly reorganize their entire life around one sentence.",
+  roast: "You've highlighted so many 'life-changing' passages that none of your books close flat anymore.",
+  strengths: ["Self-awareness", "Openness", "Meaning-making"],
+  axes: { heartVsHead: 1, plotVsProse: 3, familiarVsFrontier: 3, lightVsDark: 2, realVsImagined: 2 },
+  book_scope: "Restless energy this month. Reach for The Secret History by Donna Tartt.",
+  spirit_book: "Siddhartha by Hermann Hesse",
+  prediction_2036: "Your retirement plan is floor-to-ceiling bookshelves and a cat named Kafka.",
+  dimensions_summary: "",
+  books_input: [],
+  created_at: new Date().toISOString(),
+};
+
 export default function ShareDebugPage() {
   const router = useRouter();
   const [aura, setAura] = useState<Aura | null>(null);
   const [tribeCode, setTribeCode] = useState<string | null>(null);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mock = params.get("mock");
+    if (mock) {
+      setAura({ ...MOCK_AURA, archetype: mock === "1" ? MOCK_AURA.archetype : mock });
+      setTribeCode(params.get("code"));
+      return;
+    }
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) {
         router.replace("/welcome");

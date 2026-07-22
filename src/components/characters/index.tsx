@@ -1,22 +1,6 @@
 "use client";
 
-import dynamic from "next/dynamic";
-
-// Lazy-load character SVGs to keep bundle manageable
-const characters: Record<string, React.ComponentType<{ c1: string; c2: string; c3: string; className?: string }>> = {
-  nocturne: dynamic(() => import("./nocturne")),
-  archivist: dynamic(() => import("./archivist")),
-  wanderer: dynamic(() => import("./wanderer")),
-  conjurer: dynamic(() => import("./conjurer")),
-  oracle: dynamic(() => import("./oracle")),
-  cartographer: dynamic(() => import("./cartographer")),
-  scribe: dynamic(() => import("./scribe")),
-  sentinel: dynamic(() => import("./sentinel")),
-  heretic: dynamic(() => import("./heretic")),
-  ember: dynamic(() => import("./ember")),
-  revenant: dynamic(() => import("./revenant")),
-  seer: dynamic(() => import("./seer")),
-};
+import { ARCHETYPE_MAP, getArchetype } from "@/data/archetypes";
 
 interface CharacterIllustrationProps {
   archetype: string;
@@ -30,13 +14,10 @@ export default function CharacterIllustration({
   archetype,
   c1,
   c2,
-  c3,
   className,
 }: CharacterIllustrationProps) {
-  const Component = characters[archetype];
-
-  if (!Component) {
-    // Fallback: decorative orb
+  if (!ARCHETYPE_MAP[archetype]) {
+    // Fallback for unknown/legacy archetypes: decorative orb
     return (
       <svg viewBox="0 0 240 280" className={className}>
         <defs>
@@ -51,5 +32,13 @@ export default function CharacterIllustration({
     );
   }
 
-  return <Component c1={c1} c2={c2} c3={c3} className={className} />;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={`/characters/${archetype}.png`}
+      alt={getArchetype(archetype)?.name || archetype}
+      className={`w-full h-full object-contain rounded-2xl ${className || ""}`}
+      style={{ filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.35))" }}
+    />
+  );
 }

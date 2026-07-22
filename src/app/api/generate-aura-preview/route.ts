@@ -55,24 +55,21 @@ export async function POST(req: NextRequest) {
 
     // Map archetype name to ID
     const archetypeMap: Record<string, string> = {
-      "The Archivist": "archivist",
-      "The Nocturne": "nocturne",
-      "The Wanderer": "wanderer",
-      "The Oracle": "oracle",
+      "The Scout": "scout",
       "The Cartographer": "cartographer",
-      "The Scribe": "scribe",
+      "The Archivist": "archivist",
+      "The Alchemist": "alchemist",
+      "The Troubadour": "troubadour",
       "The Sentinel": "sentinel",
-      "The Heretic": "heretic",
-      "The Ember": "ember",
-      "The Revenant": "revenant",
-      "The Seer": "seer",
-      "The Conjurer": "conjurer",
+      "The Dreamer": "dreamer",
+      "The Scholar": "scholar",
+      "The Seeker": "seeker",
     };
 
     const archetypeId = ARCHETYPE_IDS.find(
       (id) => auraData.archetype.toLowerCase().includes(id)
     );
-    const resolvedArchetype = archetypeMap[auraData.archetype] || archetypeId || "nocturne";
+    const resolvedArchetype = archetypeMap[auraData.archetype] || archetypeId || "seeker";
 
     // Return aura object matching Aura type shape (but without DB fields)
     const aura = {

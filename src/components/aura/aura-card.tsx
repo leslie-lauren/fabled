@@ -3,17 +3,7 @@
 import { useState, useRef } from "react";
 import type { Aura } from "@/lib/types";
 import { getArchetype } from "@/data/archetypes";
-import AxisBar from "./axis-bar";
-import AxesInfoModal from "./axes-info-modal";
 import CharacterIllustration from "../characters";
-
-const AXES_META = [
-  { key: "heartVsHead" as const, left: "Heart", right: "Head" },
-  { key: "plotVsProse" as const, left: "Plot", right: "Prose" },
-  { key: "familiarVsFrontier" as const, left: "Familiar", right: "Frontier" },
-  { key: "lightVsDark" as const, left: "Light", right: "Dark" },
-  { key: "realVsImagined" as const, left: "Real", right: "Imagined" },
-];
 
 const MONTH_NAME = new Date().toLocaleString("default", { month: "long" });
 
@@ -31,7 +21,6 @@ interface AuraCardProps {
 }
 
 export default function AuraCard({ aura, showRegenerate, onRegenerate }: AuraCardProps) {
-  const [showAxesInfo, setShowAxesInfo] = useState(false);
   const [bonusIndex, setBonusIndex] = useState(0);
   const touchRef = useRef<number | null>(null);
 
@@ -79,7 +68,7 @@ export default function AuraCard({ aura, showRegenerate, onRegenerate }: AuraCar
       </h2>
 
       {/* 3. Bio */}
-      <p className="font-display text-sm italic text-center leading-relaxed mb-5 px-3" style={{ color: "#9B958A" }}>
+      <p className="text-sm text-center leading-relaxed mb-5 px-3" style={{ color: "#9B958A" }}>
         {aura.bio}
       </p>
 
@@ -100,51 +89,12 @@ export default function AuraCard({ aura, showRegenerate, onRegenerate }: AuraCar
         ))}
       </div>
 
-      {/* 5. Reading Dimensions */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <p className="label-mono">Reading Dimensions</p>
-          <button
-            onClick={() => setShowAxesInfo(true)}
-            className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] cursor-pointer transition-colors"
-            style={{ border: "1px solid rgba(255,255,255,0.1)", color: "#5A564F", fontFamily: "'DM Sans', sans-serif" }}
-          >
-            i
-          </button>
-        </div>
-
-        {/* Personalized dimensions summary */}
-        {aura.dimensions_summary && (
-          <div
-            className="rounded-xl px-3.5 py-3 mb-4 text-xs leading-relaxed"
-            style={{
-              background: `${c1}08`,
-              border: `1px solid ${c1}10`,
-              color: "#9B958A",
-            }}
-          >
-            {aura.dimensions_summary}
-          </div>
-        )}
-
-        {AXES_META.map((axis) => (
-          <AxisBar
-            key={axis.key}
-            label=""
-            leftLabel={axis.left}
-            rightLabel={axis.right}
-            value={aura.axes[axis.key]}
-            color={c1}
-          />
-        ))}
-      </div>
-
-      {/* 6. Story Spirits Noticed */}
+      {/* 5. Story Spirits Noticed */}
       <div className="mb-6 text-center px-2">
         <p className="label-mono mb-2.5" style={{ color: "#5A564F" }}>
           ✦ The Story Spirits Noticed
         </p>
-        <p className="font-display text-sm italic leading-relaxed" style={{ color: "#B8B2A8" }}>
+        <p className="text-sm leading-relaxed" style={{ color: "#B8B2A8" }}>
           &ldquo;{aura.superlative}&rdquo;
         </p>
       </div>
@@ -233,11 +183,7 @@ export default function AuraCard({ aura, showRegenerate, onRegenerate }: AuraCar
                 {card.fullLabel}
               </p>
               <p
-                className={`text-sm font-light leading-relaxed ${
-                  card.key === "spiritBook"
-                    ? "font-display italic"
-                    : ""
-                }`}
+                className="text-sm font-light leading-relaxed"
                 style={{ color: "#C8C2B8" }}
               >
                 {bonusFieldMap[card.key]}
@@ -284,7 +230,6 @@ export default function AuraCard({ aura, showRegenerate, onRegenerate }: AuraCar
         </button>
       )}
 
-      {showAxesInfo && <AxesInfoModal onClose={() => setShowAxesInfo(false)} />}
     </div>
   );
 }

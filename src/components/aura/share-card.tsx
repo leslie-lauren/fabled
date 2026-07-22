@@ -9,7 +9,7 @@ interface ShareCardProps {
 
 /**
  * The Share My Aura card. Single source of truth — renders at a FIXED
- * 1080×1920 pixels. Used for both:
+ * 1080×1920 pixels (Instagram story size). Used for both:
  * - the on-screen preview (wrap in a div with transform: scale(0.315))
  * - the html2canvas capture (use as-is for a 1080×1920 PNG)
  *
@@ -24,10 +24,10 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
   const monthName = new Date().toLocaleString("default", { month: "long" }).toUpperCase();
 
   const bonusGrid = [
-    { emoji: "✨", label: `${monthName} BOOK-SCOPE`, text: aura.book_scope || "", clamp: 3 },
-    { emoji: "🧚", label: "SOUL READ", text: aura.spirit_book || "", clamp: 2 },
-    { emoji: "🚩", label: "READING RED FLAG", text: aura.roast || "", clamp: 3 },
-    { emoji: "🔮", label: "YOUR EPILOGUE", text: aura.prediction_2036 || "", clamp: 3 },
+    { emoji: "✨", label: `${monthName} BOOK-SCOPE`, text: aura.book_scope || "" },
+    { emoji: "🧚", label: "SOUL READ", text: aura.spirit_book || "" },
+    { emoji: "🚩", label: "READING RED FLAG", text: aura.roast || "" },
+    { emoji: "🔮", label: "YOUR EPILOGUE", text: aura.prediction_2036 || "" },
   ];
 
   return (
@@ -47,7 +47,7 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
         style={{
           position: "absolute",
           inset: 0,
-          background: `linear-gradient(170deg, ${c1}DD 0%, ${c3}BB 20%, #0D0B10 45%, #0D0B10 65%, ${c3}99 85%, ${c2}77 100%)`,
+          background: `linear-gradient(170deg, ${c1}DD 0%, ${c3}BB 18%, #0D0B10 42%, #0D0B10 68%, ${c3}99 88%, ${c2}77 100%)`,
         }}
       />
       <div
@@ -55,82 +55,89 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
           position: "absolute",
           inset: 0,
           background:
-            "radial-gradient(ellipse at 40% 10%, rgba(255,255,255,0.12) 0%, transparent 45%), radial-gradient(ellipse at 60% 90%, rgba(255,255,255,0.06) 0%, transparent 40%)",
-        }}
-      />
-      {/* Inner border */}
-      <div
-        style={{
-          position: "absolute",
-          top: 38,
-          left: 38,
-          right: 38,
-          bottom: 38,
-          border: "3px solid rgba(255,255,255,0.06)",
-          borderRadius: 44,
-          pointerEvents: "none",
+            "radial-gradient(ellipse at 50% 12%, rgba(255,255,255,0.14) 0%, transparent 48%), radial-gradient(ellipse at 50% 92%, rgba(255,255,255,0.07) 0%, transparent 42%)",
         }}
       />
 
-      {/* Content container */}
-      <div style={{ position: "relative", zIndex: 1, padding: "50px 50px 40px" }}>
-        {/* 'MY READING AURA' header */}
+      {/* Content container — flex column filling the full 1920px */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          padding: "64px 60px 56px",
+        }}
+      >
+        {/* Header */}
         <div
           style={{
             fontFamily: "var(--font-mono)",
-            fontSize: 20,
-            letterSpacing: "0.25em",
+            fontSize: 26,
+            letterSpacing: "0.3em",
             textTransform: "uppercase",
-            color: "rgba(255,255,255,0.35)",
+            color: "rgba(255,255,255,0.5)",
             textAlign: "center",
-            marginBottom: 30,
           }}
         >
-          MY READING AURA
+          ✦ My Reading Aura ✦
         </div>
 
-        {/* Character */}
-        <div style={{ width: 200, height: 234, margin: "0 auto 20px" }}>
-          <CharacterIllustration archetype={aura.archetype} c1={c1} c2={c2} c3={c3} />
+        {/* Character hero */}
+        <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
+          <div
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 640,
+              height: 640,
+              background: `radial-gradient(circle, ${c1}55 0%, transparent 65%)`,
+              borderRadius: "50%",
+            }}
+          />
+          <div
+            style={{
+              position: "relative",
+              width: 330,
+              height: 500,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <CharacterIllustration archetype={aura.archetype} c1={c1} c2={c2} c3={c3} />
+          </div>
         </div>
 
-        {/* Archetype Name */}
-        <div
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: 80,
-            fontWeight: 700,
-            color: "#F5F0E8",
-            lineHeight: 1.05,
-            textAlign: "center",
-            marginBottom: 20,
-            textShadow: "0 4px 22px rgba(0,0,0,0.4)",
-          }}
-        >
-          {archetype?.name || aura.archetype}
-        </div>
-
-        {/* Bio — 2 lines max */}
-        <div
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: 24,
-            color: "rgba(245,240,232,0.65)",
-            lineHeight: 1.5,
-            textAlign: "center",
-            marginBottom: 28,
-            padding: "0 20px",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            // html2canvas ignores -webkit-line-clamp; an explicit maxHeight
-            // keeps the exported PNG clipped to the same box (24 * 1.5 * 2).
-            maxHeight: 72,
-          }}
-        >
-          {aura.bio}
+        {/* Archetype name + bio */}
+        <div style={{ textAlign: "center" }}>
+          <div
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: 104,
+              fontWeight: 700,
+              color: "#F5F0E8",
+              lineHeight: 1.05,
+              textShadow: "0 6px 28px rgba(0,0,0,0.45)",
+              marginBottom: 24,
+            }}
+          >
+            {archetype?.name || aura.archetype}
+          </div>
+          <div
+            style={{
+              fontSize: 34,
+              color: "rgba(245,240,232,0.78)",
+              lineHeight: 1.45,
+              padding: "0 40px",
+            }}
+          >
+            {aura.bio}
+          </div>
         </div>
 
         {/* Strength pills */}
@@ -138,9 +145,8 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
           style={{
             display: "flex",
             justifyContent: "center",
-            gap: 12,
+            gap: 16,
             flexWrap: "wrap",
-            marginBottom: 40,
           }}
         >
           {aura.strengths.map((str, i) => (
@@ -150,13 +156,12 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "10px 24px",
+                padding: "14px 34px",
                 borderRadius: 60,
-                background: "rgba(255,255,255,0.08)",
-                border: "2px solid rgba(255,255,255,0.12)",
-                color: "rgba(245,240,232,0.85)",
-                fontSize: 20,
-                fontFamily: "var(--font-body)",
+                background: "rgba(255,255,255,0.09)",
+                border: "2px solid rgba(255,255,255,0.16)",
+                color: "rgba(245,240,232,0.9)",
+                fontSize: 27,
                 fontWeight: 500,
                 whiteSpace: "nowrap",
                 lineHeight: 1.4,
@@ -172,52 +177,42 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
-            gap: 16,
-            marginBottom: 28,
+            gap: 20,
           }}
         >
           {bonusGrid.map((item, i) => (
             <div
               key={i}
               style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "2px solid rgba(255,255,255,0.07)",
-                borderRadius: 28,
-                padding: 20,
+                background: "rgba(255,255,255,0.05)",
+                border: "2px solid rgba(255,255,255,0.09)",
+                borderRadius: 32,
+                padding: "26px 28px",
                 textAlign: "center",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                minHeight: 200,
+                justifyContent: "flex-start",
               }}
             >
-              <div style={{ fontSize: 36, marginBottom: 6 }}>{item.emoji}</div>
+              <div style={{ fontSize: 40, marginBottom: 8, lineHeight: 1 }}>{item.emoji}</div>
               <div
                 style={{
                   fontFamily: "var(--font-mono)",
-                  fontSize: 14,
-                  color: "rgba(255,255,255,0.4)",
-                  letterSpacing: "0.12em",
+                  fontSize: 17,
+                  color: "rgba(255,255,255,0.45)",
+                  letterSpacing: "0.14em",
                   textTransform: "uppercase",
-                  marginBottom: 10,
+                  marginBottom: 12,
                 }}
               >
                 {item.label}
               </div>
               <div
                 style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: 22,
-                  fontStyle: "italic",
-                  color: "rgba(245,240,232,0.75)",
-                  lineHeight: 1.4,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "-webkit-box",
-                  WebkitLineClamp: item.clamp,
-                  WebkitBoxOrient: "vertical",
-                  // html2canvas ignores -webkit-line-clamp; clip to matching box.
-                  maxHeight: Math.round(22 * 1.4 * item.clamp),
+                  fontSize: 27,
+                  color: "rgba(245,240,232,0.85)",
+                  lineHeight: 1.35,
                 }}
               >
                 {item.text}
@@ -226,23 +221,22 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
           ))}
         </div>
 
-        {/* Gold CTA */}
+        {/* Gold CTA — the conversion moment */}
         <div
           style={{
-            background: "rgba(196,149,106,0.12)",
-            border: "2px solid rgba(196,149,106,0.22)",
-            borderRadius: 28,
-            padding: "24px 32px",
+            background: "linear-gradient(135deg, #EBBE85 0%, #D9A06B 55%, #C4885A 100%)",
+            borderRadius: 32,
+            padding: "34px 40px",
             textAlign: "center",
-            marginBottom: 20,
+            boxShadow: "0 12px 44px rgba(0,0,0,0.35)",
           }}
         >
           <div
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: 34,
+              fontSize: 46,
               fontWeight: 700,
-              color: "rgba(245,240,232,0.92)",
+              color: "#211508",
               marginBottom: 8,
             }}
           >
@@ -250,74 +244,48 @@ export default function ShareCard({ aura, tribeCode }: ShareCardProps) {
           </div>
           <div
             style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 20,
-              color: "rgba(196,149,106,0.8)",
+              fontSize: 27,
+              fontWeight: 600,
+              color: "rgba(33,21,8,0.75)",
+              letterSpacing: "0.02em",
             }}
           >
-            join-fabled.vercel.app
+            {tribeCode ? (
+              <>join my tribe · code {tribeCode} · join-fabled.vercel.app</>
+            ) : (
+              <>find yours at join-fabled.vercel.app</>
+            )}
           </div>
         </div>
 
-        {/* Tribe invite (show only if code provided) */}
-        {tribeCode && (
-          <div
-            style={{
-              textAlign: "center",
-              background: "rgba(255,255,255,0.03)",
-              border: "2px solid rgba(255,255,255,0.06)",
-              borderRadius: 20,
-              padding: "14px 24px",
-              marginBottom: 20,
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 18,
-                letterSpacing: "0.12em",
-                color: "rgba(255,255,255,0.5)",
-              }}
-            >
-              Join my tribe:{" "}
-            </span>
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 22,
-                letterSpacing: "0.18em",
-                color: "rgba(255,255,255,0.75)",
-                fontWeight: 600,
-              }}
-            >
-              {tribeCode}
-            </span>
-          </div>
-        )}
-
         {/* Branding footer */}
-        <div style={{ textAlign: "center" }}>
-          <div
+        <div
+          style={{
+            textAlign: "center",
+            display: "flex",
+            alignItems: "baseline",
+            justifyContent: "center",
+            gap: 16,
+          }}
+        >
+          <span
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: 28,
-              color: "rgba(255,255,255,0.2)",
+              fontSize: 32,
+              color: "rgba(255,255,255,0.4)",
               letterSpacing: "0.1em",
             }}
           >
             fabled
-          </div>
-          <div
+          </span>
+          <span
             style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 16,
-              color: "rgba(255,255,255,0.12)",
-              fontStyle: "italic",
-              marginTop: 4,
+              fontSize: 20,
+              color: "rgba(255,255,255,0.25)",
             }}
           >
             a whimsical book club
-          </div>
+          </span>
         </div>
       </div>
     </div>

@@ -329,7 +329,7 @@ export default function JoinByLinkPage() {
               </h1>
 
               {sharerAura && (
-                <p className="font-display text-sm italic mb-7 px-3" style={{ color: "#9B958A" }}>
+                <p className="text-sm mb-7 px-3" style={{ color: "#9B958A" }}>
                   🚩 {sharerAura.roast}
                 </p>
               )}
@@ -592,7 +592,7 @@ export default function JoinByLinkPage() {
           </h1>
 
           <p
-            className="font-display text-sm italic leading-relaxed mb-4 px-5"
+            className="text-sm leading-relaxed mb-4 px-5"
             style={{ color: "#B8B2A8" }}
           >
             {aura.bio}
